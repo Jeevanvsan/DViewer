@@ -1,1 +1,2 @@
-source : csv
+- source : csv
+  name : csv_connect

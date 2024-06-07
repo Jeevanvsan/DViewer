@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/thinline.css">
+
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
+
+    <title>DViewer</title>
+    <style>
+        body{
+            margin: 0px;
+            padding: 0px;
+            font-family: 'Arimo', sans-serif;
+
+        }
+        .main_cont{
+            width: 100%;
+            height: 100vh;
+        }
+        header{
+            background-color: rgb(16, 16, 16);
+            height: 5vh;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        .head_name h1{
+            margin: 0;
+            padding: 0 0 0 40px;
+            color: aliceblue;
+        }
+        .head_menu ul {
+            padding: 0 40px 0 0 ;
+            display: flex;
+            list-style-type: none;
+        }
+
+        .head_menu a {
+            padding: 0 10px 0 10px;
+            text-decoration: none;
+            color :aliceblue;
+        }
+        .body_cont{
+            height: 95vh;
+            background-color: aqua;
+            display: flex;
+        }
+        .left_cont{
+            height: 95vh;
+            width: 15%;
+            background-color: #fff;
+        }
+        .middle_cont{
+            height: 94.8vh;
+            width: 65%;
+            background-color: whitesmoke;
+            border: solid 1px #dadada;
+        }
+        .right_cont{
+            height: 95vh;
+            width: 20%;
+            background-color: #fff;
+        }
+
+        @import url('https://fonts.googleapis.com/css?family=Arimo:400,700&display=swap');
+ 
+
+        .warpper{
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 5px;
+        }
+        .tab{
+        cursor: pointer;
+        padding:10px 20px;
+        margin:0px 2px;
+        background:#000;
+        display:inline-block;
+        color:#fff;
+        border-radius:3px 3px 0px 0px;
+        box-shadow: 0 0.5rem 0.8rem #00000080;
+        }
+        .panels{
+        background:#fffffff6;
+        box-shadow: 0 2px 10px #00000080;
+        height:60vh;
+        width:95%;
+        border-radius:3px;
+        overflow:hidden;
+        padding:20px;  
+        }
+        .panel{
+        display:none;
+        animation: fadein .8s;
+        }
+      
+
+        .radio{
+            display:none;
+            }
+            #one:checked ~ .panels #one-panel,
+            #two:checked ~ .panels #two-panel,
+            #three:checked ~ .panels #three-panel{
+            display:block
+            }
+            #one:checked ~ .tabs #one-tab,
+            #two:checked ~ .tabs #two-tab,
+            #three:checked ~ .tabs #three-tab{
+            background:#fffffff6;
+            color:#000;
+            border-top: 3px solid #000;
+        }
+
+        /* right panel */
+        .warpper_1{
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 5px;
+        }
+        .tab_1{
+        cursor: pointer;
+        padding:10px 20px;
+        margin:0px 2px;
+        background:#000;
+        display:inline-block;
+        color:#fff;
+        border-radius:3px 3px 0px 0px;
+        box-shadow: 0 0.5rem 0.8rem #00000080;
+        }
+        .panels_1{
+        background:#fffffff6;
+        box-shadow: 0 2px 10px #00000080;
+        height:85vh;
+        width:88%;
+        border-radius:3px;
+        overflow:hidden;
+        padding:20px;  
+        }
+        .panel_1{
+        display:none;
+        animation: fadein .8s;
+        }
+      
+
+        .radio_1{
+            display:none;
+            }
+            #one_1:checked ~ .panels_1 #one-panel_1,
+            #two_1:checked ~ .panels_1 #two-panel_1{
+            display:block
+            }
+            #one_1:checked ~ .tabs_1 #one-tab_1,
+            #two_1:checked ~ .tabs_1 #two-tab_1{
+            background:#fffffff6;
+            color:#000;
+            border-top: 3px solid #000;
+        }
+
+        #searchInput {
+            height:1vh;
+            background-position: 10px 12px; /* Position the search icon */
+            background-repeat: no-repeat; /* Do not repeat the icon image */
+            width: 30%; 
+            font-size: 16px; /* Increase font-size */
+            padding: 12px 20px 12px 40px; /* Add some padding */
+            border: 2px solid #D3D3D3; 
+            margin-bottom: 12px; /* Add some space below the input */
+            border-radius:10px;
+            box-shadow: 0 0 8px 3px #D3D3D3;
+          }
+
+          #source_name{
+            cursor: pointer;
+          }
+          #data_tbl{
+            font-size: 12px;
+            width: 100%;
+            user-select: none;
+            background: white;
+            border-radius:3px;
+            border-collapse: collapse;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            animation: float 5s infinite
+          }
+          #table_cont{
+            height: 55vh;
+            width: 100%;
+            margin: 0;
+            overflow: auto;
+          }
+          #data_tbl td:hover{
+            border: solid 2px rgba(0, 183, 255, 0.83);
+          }
+          #data_tbl th{
+            position: sticky;
+            top: 0;
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+
+          }
+          #data_tbl td{
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+         
+          .highlight {
+            border: solid 2px rgba(104, 204, 243, 0.83);
+            background-color: rgba(30, 143, 255, 0.268);
+          }
+
+          .search_cont{
+            display: flex;
+            justify-content: space-between;
+
+          }
+          #value_cont{
+            margin: 5px;
+            height: 24vh;
+            width: 99%;
+            background-color: rgb(255, 255, 255);
+            border-radius: 10px;
+            box-shadow: 1px 2px 10px #000;
+            overflow: auto;
+          }
+
+          #value_cont h4{
+            padding: 10px 10px 0 10px;
+          }
+
+          #value_cont pre{
+            font-size: 18px;
+            padding: 0 30px 30px 30px;
+          }
+
+          /* filter */
+
+        .div-container {
+            border: 1px solid #ccc;
+            padding: 0px;
+            margin-bottom: 10px;
+            transition: height 0.3s;
+            overflow: hidden;
+            border-radius: 4px;
+            box-shadow:  0px 1px 3px #797979;
+        }
+
+        .div-header {
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            background-color: #e3e3e3;
+            padding: 5px;
+        }
+
+        .close-btn{
+            font-size: 25px;
+            color: #797979;
+            padding: 0 10px 0 0;
+        }
+
+        .div-content {
+            padding: 10px;
+        }
+
+        .minimized .div-content {
+            display: none;
+        }
+
+        #filter_cont{
+            height: 84vh;
+            overflow-y: auto;
+        }
+
+        #addDivButton{
+            margin: 10px;
+        }
+
+        #filter_columns p{
+        font-size: 15px;
+        }
+        #filter_columns ul{
+        display: flex;
+        flex-wrap: wrap;
+        padding: 7px;
+        margin: 12px 0;
+        border-radius: 5px;
+        border: 1px solid #a6a6a6;
+        }
+        #filter_columns ul  li{
+        color: #333;
+        margin: 4px 3px;
+        list-style: none;
+        border-radius: 5px;
+        background: #F2F2F2;
+        padding: 5px 8px 5px 10px;
+        border: 1px solid #e3e1e1;
+        }
+        #filter_columns ul li i{
+        height: 20px;
+        width: 20px;
+        color: #808080;
+        margin-left: 8px;
+        font-size: 12px;
+        cursor: pointer;
+        border-radius: 50%;
+        background: #dfdfdf;
+        justify-content: center;
+        }
+        #filter_columns ul input{
+        flex: 1;
+        padding: 5px;
+        border: none;
+        outline: none;
+        font-size: 16px;
+        }
+        .suggestion {
+        cursor: pointer;
+        background-color: #f0f0f0;
+        padding: 5px;
+        margin-top: 2px;
+        }
+        .suggestion:hover {
+            background-color: #e0e0e0;
+        }
+
+        #filter_option{
+            padding: 5px;
+            font-size: 16px;
+            width: 100%;
+            border-radius: 3px;
+        }
+
+        .logic1_opt{
+            margin: 10px;
+            margin-top: 0;
+            padding: 5px;
+            font-size: 16px;
+            width: 90%;
+            border-radius: 3px;
+        }
+
+        .logic1_value{
+            margin: 10px;
+            margin-top: 0;
+            padding: 5px;
+            font-size: 16px;
+            width: 90%;
+            border-radius: 3px;
+        }
+        .apply_btn{
+            font-size: 14px;
+            background: transparent;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="main_cont">
+        <header>
+            <div class="head_name">
+                <h1>
+                    DViewer
+                </h1>
+            </div>
+            <div class="head_menu">
+                <ul>
+                    <li><button onclick="addConnection()">Add connection</button></li>
+                    <li><a href="">FAQ</a></li>
+                    <li><a href="">About</a></li>
+                </ul>
+            </div>
+        </header>
+        <div class="body_cont">
+            <div class="left_cont">
+                <ul id="source_name">
+
+                </ul>
+            </div>
+            <div class="middle_cont">
+                <div class="warpper">
+                    <input class="radio" id="one" name="group" type="radio" checked>
+                    <input class="radio" id="two" name="group" type="radio">
+                    <input class="radio" id="three" name="group" type="radio">
+                    <div class="tabs">
+                    <label class="tab" id="one-tab" for="one">Data</label>
+                    <label class="tab" id="two-tab" for="two">Structure</label>
+                    <label class="tab" id="three-tab" for="three">Settings</label>
+                    </div>
+                    <div class="panels">
+                        <div class="panel" id="one-panel">
+                            <div class="search_cont">
+                                <input type="text" id="searchInput" placeholder="Search ...">
+                                <p id="loading_p"></p>
+                            </div>
+                            
+                            <div id="table_cont">
+                                <table>
+
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="panel" id="two-panel">
+                            <input type="text" id="searchInput" onkeyup="myFunction()" placeholder="Search ...">
+                            <div id="table_cont">
+                                <table>
+
+                                </table>
+                            </div>                           
+                        </div>
+                        <div class="panel" id="three-panel">
+                            <p>Settings</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="value_cont">
+
+                </div>
+            </div>
+            <div class="right_cont">
+                <div class="warpper_1">
+                    <input class="radio_1" id="one_1" name="group_1" type="radio" checked>
+                    <input class="radio_1" id="two_1" name="group_1" type="radio">
+                    <div class="tabs_1">
+                    <label class="tab_1" id="one-tab_1" for="one_1">filter</label>
+                    <label class="tab_1" id="two-tab_1" for="two_1">calculation</label>
+                    </div>
+                    <div class="panels_1">
+                        <div class="panel_1" id="one-panel_1">
+                            <button id="addDivButton">Add filter</button>
+
+                            <div id="filter_cont">
+                                <div id="columnSelector" class="div-container minimized">
+                                    <div class="div-header" onclick="toggleColumnSelector()">Column Selector</div>
+                                    <div class="div-content">
+                                        <label><input type="checkbox" checked="true" id="selectAll"  > Select All</label>
+                                        <div id="columnCheckboxes"></div>
+                                    </div>
+                                </div>
+                                <div id="container">
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel_1" id="two-panel_1">
+                            calculation                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    tags = {};
+
+    var settings = JSON.parse('[[ settings | tojson | safe]]');
+
+    if (settings){
+        get_settings(settings);
+    }
+    function addConnection(){
+    alert('Connection');
+    }
+
+    function get_settings(settings){
+        var source_ul = document.getElementById('source_name');
+        for (key in settings['sources_list']){
+            connection_name = key
+            source_list = settings['sources_list'][key]
+            source_ul.innerHTML += `<h2>${key}</h2>`
+            source_list.forEach(element => {
+                source_ul.innerHTML += `<li><a onclick="get_data('${connection_name}','${element}')"><p>${element}</p></a></li>` 
+            });
+
+        }
+    }
+
+    function get_data(connection_name,name) {
+        document.getElementById('loading_p').innerHTML = 'Loading...';
+        document.getElementById('table_cont').innerHTML = ''
+
+        fetch(`/get_data/${connection_name}/${name}`) 
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('loading_p').innerHTML = 'selected top 50';
+            document.getElementById('table_cont').innerHTML = data['html']
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            // Handle errors here
+        });
+    }
+    
+    // Row highlight
+
+    function attachDoubleClickHandler(table) {
+            table.addEventListener('dblclick', function(event) {
+                const cell = event.target;
+                const row = cell.closest('tr');
+                
+                if (row) {
+                    // Toggle highlight for the clicked row
+                    row.classList.toggle('highlight');
+                }
+            });
+        }
+
+    // Column highlight
+    function attachClickHandlerToHeaders(table) {
+        const headers = table.querySelectorAll('th');
+        headers.forEach(function(header, index) {
+            header.addEventListener('click', function() {
+                const rows = table.querySelectorAll('tr');
+                rows.forEach(function(row) {
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach(function(cell, cellIndex) {
+                        // Toggle highlight for the clicked column
+                        if (cellIndex === index) {
+                            cell.classList.toggle('highlight');
+
+                        }
+                    });
+                });
+            });
+        });
+    }
+
+    // Value view
+    function attachClickHandlerToCell(table) {
+        table.addEventListener('click', function(event) {
+            const cell = event.target;
+            var val = cell.innerHTML;
+
+            if (cell.tagName.toLowerCase() === 'td') {
+                const cellIndex = cell.cellIndex;
+                const headerRow = table.querySelector('thead tr');
+                const headerCell = headerRow ? headerRow.cells[cellIndex] : null;
+
+                if (headerCell) {
+                    var column = headerCell.innerHTML.replace(/[▲▼]/g, '');
+                    try {
+                        const correctedJsonString = val.replace(/'/g, '"');
+
+                        val = JSON.parse(correctedJsonString);
+                        console.log(val);
+                        document.getElementById('value_cont').innerHTML = `<h4>${column}</h4><pre>${JSON.stringify(val, undefined, 2)}</pre>`
+
+                    } catch (e) {
+
+                        console.log(e);
+
+                        document.getElementById('value_cont').innerHTML = `<h4>${column}</h4><pre>${val}</pre>`
+                        
+                    }
+                } else {
+                    console.log('No corresponding header cell found');
+                }
+            }
+        });
+    }
+
+    // Sort
+
+    function attachClickHandlerToSort(table){
+    // var table = document.getElementById('data_tbl');
+    var headers = table.querySelectorAll('th');
+    var asc = true;
+
+    headers.forEach(function(header, index) {{
+        var sortIcon = document.createElement('span');
+        sortIcon.innerHTML = '&#9650;'; // Ascending arrow
+        sortIcon.classList.add('sort-icon');
+        header.appendChild(sortIcon);
+
+        header.addEventListener('click', function() {
+            var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'), 0);
+
+            rows.sort(function (a, b) {{
+                var cellA = a.querySelectorAll('td')[index].innerText;
+                var cellB = b.querySelectorAll('td')[index].innerText;
+
+                if (!isNaN(cellA) && !isNaN(cellB)) {{
+                    return asc ? cellA - cellB : cellB - cellA;
+                }}
+                
+                return asc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+            }});
+
+            asc = !asc;
+            sortIcon.innerHTML = asc ? '&#9650;' : '&#9660;'; // Toggle arrow
+
+            rows.forEach(function(row) {{
+                table.querySelector('tbody').appendChild(row);
+            }});
+        });
+    }});
+    }
+
+    // filter
+
+    document.getElementById('selectAll').addEventListener('change', (event) =>{
+        console.log(event.currentTarget.checked);
+        const checkboxes = document.querySelectorAll('#columnCheckboxes input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+                checkbox.checked = event.currentTarget.checked;
+                const index = checkbox.dataset.column;
+
+                const table = document.getElementById('data_tbl');
+                const rows = table.querySelectorAll('tr');
+
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll(`th, td`);
+                    if (cells[index]) {
+                        cells[index].style.display = checkbox.checked ? '' : 'none';
+                    }
+                });
+            
+            });
+    });
+
+
+    function generateColumnSelector(table) {
+        // const table = document.getElementById('data_tbl');
+        const headers = table.querySelectorAll('th');
+        const columnCheckboxes = document.getElementById('columnCheckboxes');
+
+        columnCheckboxes.innerHTML = ''
+
+        headers.forEach((header, index) => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = true;
+            checkbox.dataset.column = index;
+            checkbox.onchange = toggleColumn;
+
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(header.textContent.replace(/[▲▼]/g, '')));
+            columnCheckboxes.appendChild(label);
+            columnCheckboxes.appendChild(document.createElement('br'));
+        });
+    }
+
+    function toggleColumn() {
+        const index = this.dataset.column;
+        const table = document.getElementById('data_tbl');
+        const rows = table.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll(`th, td`);
+            if (cells[index]) {
+                cells[index].style.display = this.checked ? '' : 'none';
+            }
+        });
+
+        // Check if all individual checkboxes are checked
+        const allCheckboxes = document.querySelectorAll('#columnCheckboxes input[type="checkbox"]');
+        const allChecked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
+        document.getElementById('selectAll').checked = allChecked;
+    }
+
+    function toggleColumnSelector() {
+        const columnSelector = document.getElementById('columnSelector');
+        columnSelector.classList.toggle('minimized');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableContainer = document.getElementById('table_cont');
+        const container = document.getElementById('container');
+        const searchInput = document.getElementById('searchInput');
+
+        let tableRows = [];
+
+        // Create an observer to watch for changes in the table container
+        const observer1 = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length > 0) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeName === 'TABLE') {
+                            attachDoubleClickHandler(node);
+                            attachClickHandlerToHeaders(node);
+                            attachClickHandlerToCell(node);
+                            attachClickHandlerToSort(node);
+                            generateColumnSelector(node);
+                            tableRows = Array.from(node.querySelectorAll('tbody tr')); // Store all table rows
+
+                        }
+                    });
+                }
+            });
+        });
+
+        const observer2 = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length > 0) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeName === 'DIV') {
+                            filterDiv(node);
+                            
+
+                        }
+                    });
+                }
+            });
+        });
+
+        // Configure the observer to watch for child nodes being added
+        observer1.observe(tableContainer, { childList: true });
+        observer2.observe(container, { childList: true });
+
+        searchInput.addEventListener('input', function() {
+            const filter = searchInput.value;
+            tableRows.forEach(function(row) {
+                const cells = row.querySelectorAll('td');
+                let rowVisible = false;
+                cells.forEach(function(cell) {
+                    if (cell.textContent.indexOf(filter) > -1) {
+                        rowVisible = true;
+                    }
+                });
+                if (rowVisible) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+
+
+    document.getElementById('addDivButton').addEventListener('click', addDiv);
+
+    function addDiv() {
+        
+        // if(document.getElementById('data_tbl')){
+        if(1){
+
+            
+
+            const container = document.getElementById('container');
+
+            // Create div container
+            const divContainer = document.createElement('div');
+            divContainer.classList.add('div-container');
+            // divContainer.className = "cls" + Math.random().toString(16).slice(2)
+            divContainer.id = "id" + Math.random().toString(16).slice(2)
+
+            // Create header
+            const divHeader = document.createElement('div');
+            divHeader.classList.add('div-header');
+            divHeader.textContent = 'filter';
+            divHeader.addEventListener('click', function() {
+                divContainer.classList.toggle('minimized');
+            });
+
+            // Create close button
+            const closeButton = document.createElement('span');
+            closeButton.classList.add('close-btn');
+            closeButton.textContent = '×';
+            closeButton.addEventListener('click', function(e) {
+                container.removeChild(divContainer);
+                removeFilterFromTable(divContainer.id);
+            });
+            
+            // Append close button to header
+            divHeader.appendChild(closeButton);
+
+            // Create content
+            const divContent = document.createElement('div');
+            divContent.classList.add('div-content');
+            const select = document.createElement('select');
+            select.id = 'filter_option'
+
+            var option1 = document.createElement("option");
+            option1.text = "None";
+            option1.value = "None";
+            // select.appendChild(option1);
+
+            var option2 = document.createElement("option");
+            option2.text = "condition";
+            option2.value = "condition";
+            select.appendChild(option2)
+
+            divContent.appendChild(select);
+
+            // Append header and content to container
+            divContainer.appendChild(divHeader);
+            divContainer.appendChild(divContent);
+
+            // Append container to main container
+            container.appendChild(divContainer);
+        }else{
+            alert('choose any of the source')
+        }
+        
+    }
+
+    var appliedFilters = {}; // Object to store applied filters
+
+    function removeFilterFromTable(div_id,flag = true) {
+        // console.log(div_id);
+        var table = document.getElementById("data_tbl");
+        // tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val}
+        var columnIndex = -1;
+        var filters = tags[div_id];
+        var column_name = filters["column"];
+        var logic1_op = ''
+        var logic1_val = ''
+        if (filters["logic1_op"]){
+            logic1_op = filters["logic1_op"];
+        }
+
+        if (filters["logic1_val"]){
+            logic1_val = filters["logic1_val"];
+        }
+
+        var headers = table.querySelectorAll('th');
+        
+        for (var i = 0; i < headers.length; i++) {
+            // console.log(headers[i].textContent);
+            // console.log(column_name);
+            if (headers[i].textContent.replace(/[▲▼]/g, '') == column_name) {
+            columnIndex = i;
+            break;
+            }
+        }
+
+        if (columnIndex === -1) {
+            console.error("Column not found.");
+            return;
+        }
+
+        if(logic1_op == "equal"){
+            for (var i = 1; i < table.rows.length; i++) {
+                var cell = table.rows[i].cells[columnIndex];
+                if (cell.textContent.trim() != logic1_val) {
+                    console.log("returning")
+                    table.rows[i].style.display = "";
+                } 
+            }
+        }else if (logic1_op == "not equal"){
+            for (var i = 1; i < table.rows.length; i++) {
+                var cell = table.rows[i].cells[columnIndex];
+                if (cell.textContent.trim() == logic1_val) {
+                    console.log("returning")
+                    table.rows[i].style.display = "";
+                } 
+            }
+        } else if (logic1_op == "contains"){
+            for (var i = 1; i < table.rows.length; i++) {
+                var cell = table.rows[i].cells[columnIndex];
+                if (!cell.textContent.trim().includes(logic1_val)) {
+                    table.rows[i].style.display = "";
+
+                } 
+            }
+        }else if (logic1_op == "not contains"){
+            for (var i = 1; i < table.rows.length; i++) {
+                var cell = table.rows[i].cells[columnIndex];
+                if (cell.textContent.trim().includes(logic1_val)) {
+                    table.rows[i].style.display = "";
+
+                } 
+            }
+        }else if (logic1_op == "starts with"){
+            for (var i = 1; i < table.rows.length; i++) {
+                var cell = table.rows[i].cells[columnIndex];
+                if (!cell.textContent.trim().startsWith(logic1_val)) {
+                    table.rows[i].style.display = "";
+
+                } 
+            }
+        }else if (logic1_op == "ends with"){
+            for (var i = 1; i < table.rows.length; i++) {
+                var cell = table.rows[i].cells[columnIndex];
+                if (!cell.textContent.trim().endsWith(logic1_val)) {
+                    table.rows[i].style.display = "";
+
+                } 
+            }
+        }
+
+
+        if (flag){
+            delete tags[div_id];
+        }
+        
+        // add remaining filters
+        if (tags){
+            for (key in tags){
+                if (key != div_id){
+                    column_name = tags[key]["column"];
+                    logic1_val = tags[key]["logic1_val"];
+                    for (var i = 0; i < headers.length; i++) {
+                        if (headers[i].textContent.replace(/[▲▼]/g, '') == column_name) {
+                        columnIndex = i;
+                        break;
+                        }
+                    }
+
+                    if (columnIndex === -1) {
+                        console.error("Column not found.");
+                        return;
+                    }
+
+                    if (tags[key]['logic1_op'] == "equal"){
+                        equal_filter(logic1_val,table,columnIndex)
+                    
+                    }else if (tags[key]['logic1_op'] == "not equal"){
+                        not_equal_filter(logic1_val,table,columnIndex)
+                    
+                    } else if (tags[key]['logic1_op'] == "contains"){
+                        contains_filter(logic1_val,table,columnIndex)
+                    
+                    } else if (tags[key]['logic1_op'] == "not contains"){
+                        not_contains_filter(logic1_val,table,columnIndex)
+                    
+                    } 
+                    else if (tags[key]['logic1_op'] == "starts with"){
+                        startswith_filter(logic1_val,table,columnIndex)
+                    
+                    }else if (tags[key]['logic1_op'] == "ends with"){
+                        endswith_filter(logic1_val,table,columnIndex)
+                    
+                    }
+                }
+            }
+        }
+
+        
+
+        
+        
+        
+    }
+
+    // filter functions
+
+    function equal_filter(logic1_val,table,columnIndex){
+        for (var i = 1; i < table.rows.length; i++) {
+            var cell = table.rows[i].cells[columnIndex];
+            if (cell.textContent.trim() == logic1_val) {
+                table.rows[i].style.display = "";
+
+            } else {
+                table.rows[i].style.display = "none";
+
+            }
+        }
+    }
+
+    function not_equal_filter(logic1_val,table,columnIndex){
+        for (var i = 1; i < table.rows.length; i++) {
+            var cell = table.rows[i].cells[columnIndex];
+            if (cell.textContent.trim() != logic1_val) {
+                table.rows[i].style.display = "";
+
+            } else {
+                table.rows[i].style.display = "none";
+
+            }
+        }
+    }
+
+    function contains_filter(logic1_val,table,columnIndex){
+        for (var i = 1; i < table.rows.length; i++) {
+            var cell = table.rows[i].cells[columnIndex];
+            if (cell.textContent.trim().includes(logic1_val)) {
+                table.rows[i].style.display = "";
+
+            } else {
+                table.rows[i].style.display = "none";
+
+            }
+        }
+    }
+
+    function not_contains_filter(logic1_val,table,columnIndex){
+        for (var i = 1; i < table.rows.length; i++) {
+            var cell = table.rows[i].cells[columnIndex];
+            if (!cell.textContent.trim().includes(logic1_val)) {
+                table.rows[i].style.display = "";
+
+            } else {
+                table.rows[i].style.display = "none";
+
+            }
+        }
+    }
+    function startswith_filter(logic1_val,table,columnIndex){
+        for (var i = 1; i < table.rows.length; i++) {
+            var cell = table.rows[i].cells[columnIndex];
+            if (cell.textContent.trim().startsWith(logic1_val)) {
+                table.rows[i].style.display = "";
+
+            } else {
+                table.rows[i].style.display = "none";
+
+            }
+        }
+    }
+
+    function endswith_filter(logic1_val,table,columnIndex){
+        for (var i = 1; i < table.rows.length; i++) {
+            var cell = table.rows[i].cells[columnIndex];
+            if (cell.textContent.trim().endsWith(logic1_val)) {
+                table.rows[i].style.display = "";
+
+            } else {
+                table.rows[i].style.display = "none";
+
+            }
+        }
+    }
+
+        
+    function remove(element, div_id){
+            // let index  = tags.indexOf(tag);
+            // tags = [...tags.slice(0, index), ...tags.slice(index + 1)];
+            // console.log(tags);
+            removeFilterFromTable(div_id, false);
+            tags[div_id]["column"] = '';
+            element.parentElement.remove();
+        }
+
+    function filtering(div,opt_val){
+        var div_id = div.id
+        console.log(tags);
+        if (opt_val =='condition'){
+                tags[div_id] = {"column":""}
+                var columns = document.createElement('div');
+                columns.id = 'filter_columns';
+                columns.innerHTML = `<ul id="tag_ul_${div_id}"><input id="col_${div_id}" type="text" spellcheck="false"></ul>`;
+                div.appendChild(columns);
+
+                const ul = document.getElementById(`tag_ul_${div_id}`),
+                    input = ul.querySelector("input");
+
+
+                // Function to create tags
+                function createTag() {
+                    ul.querySelectorAll("li").forEach(li => li.remove());
+                    // tags.slice().reverse().forEach(tag => {
+                    //     let liTag = `<li>${tag} <i class="uit uit-multiply" onclick="remove(this, '${tag}')"></i></li>`;
+                    //     ul.insertAdjacentHTML("afterbegin", liTag);
+                    // });
+
+                    let liTag = `<li>${tags[div_id]["column"]} <i class="uit uit-multiply" onclick="remove(this, '${div_id}')"></i></li>`;
+                    ul.insertAdjacentHTML("afterbegin", liTag);
+                }
+
+                // Enable dragging on table headers
+                const headers = document.querySelectorAll("#data_tbl th");
+                headers.forEach(header => {
+                    header.setAttribute("draggable", true);
+                    header.style.cursor = 'grab';
+                    header.addEventListener("dragstart", (e) => {
+                        header.style.cursor = 'grabbing';
+
+                        e.dataTransfer.setData("text", e.target.innerText.replace(/[▲▼]/g, ''));
+                    });
+                });
+
+                // Enable dropping on the input field
+                input.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                });
+
+                input.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    let droppedText = e.dataTransfer.getData("text");
+                    
+
+                    if (droppedText.length > 0 && !tags[div_id]["column"].includes(droppedText)) {
+                        // if (tags.length < 10) {
+                        //     tags.push(droppedText);
+                        //     createTag();
+                        // }
+
+                            tags[div_id]["column"] = droppedText;
+                            createTag();
+                        }
+                    
+                });
+
+
+                // Attach the keyup event listener to the input field
+                input.addEventListener("keyup", (e) => {
+                    showSuggestions(e.target.value);
+                    // addTag(e);
+                });
+
+
+                // Extract column names from the table with id 'data_tbl'
+                function getColumnNames() {
+                    const table = document.getElementById("data_tbl");
+                    const headers = table.querySelectorAll("th");
+                    return Array.from(headers).map(header => header.innerText.replace(/[▲▼]/g, '').trim());
+                }
+
+                const columnNames = getColumnNames();
+
+                // Show suggestions based on input
+                function showSuggestions(value) {
+                    clearSuggestions();
+                    if (value.length === 0) return;
+                    const suggestions = columnNames.filter(name => name.toLowerCase().includes(value.toLowerCase()));
+                    suggestions.forEach(suggestion => {
+                        let suggestionItem = document.createElement('li');
+                        suggestionItem.textContent = suggestion;
+                        suggestionItem.classList.add('suggestion');
+                        suggestionItem.addEventListener('click', () => {
+                            // if (!tags.includes(suggestion)) {
+                            //     tags.push(suggestion);
+                            //     createTag();
+                            // }
+                            if (!tags[div_id]["column"].includes(suggestion)) {
+                                console.log(tags[div_id])
+
+                                tags[div_id]["column"] = suggestion;
+                                createTag();
+                            }
+                            input.value = "";
+                            clearSuggestions();
+                        });
+                        ul.appendChild(suggestionItem);
+                    });
+                }
+
+                // Clear previous suggestions
+                function clearSuggestions() {
+                    const suggestions = ul.querySelectorAll('.suggestion');
+                    suggestions.forEach(suggestion => suggestion.remove());
+                }
+
+                
+                logic_list = ['equal','not equal','contains', 'not contains', 'starts with', 'ends with']
+
+                var logic1_opt = document.createElement('select');
+                logic1_opt.id= 'logic1_opt'+div_id
+                logic1_opt.className= 'logic1_opt'
+
+                // var option1 = document.createElement("option");
+                // option1.text = "contains";
+                // option1.value = "contains";
+                // logic1_opt.appendChild(option1);
+
+                for (var i = 0; i < logic_list.length; i++) {
+                    var option = document.createElement("option");
+                    
+                    option.text = logic_list[i];
+                    option.value = logic_list[i];
+                    logic1_opt.appendChild(option);
+                }
+
+                div.appendChild(logic1_opt);
+
+                var logic1_value = document.createElement('input');
+                logic1_value.type = 'text';
+                logic1_value.id = 'logic1_value'+div_id;
+                logic1_value.className = 'logic1_value';
+                div.appendChild(logic1_value);
+                div.appendChild(document.createElement('br'));
+
+                var apply_btn = document.createElement('button');
+                apply_btn.textContent = 'Apply';
+                apply_btn.id = 'apply_btn'+div_id;
+                apply_btn.className = 'apply_btn';
+                div.appendChild(apply_btn);
+
+                document.getElementById('apply_btn'+div_id).addEventListener('click', () =>{
+                    var logic1_op = document.getElementById('logic1_opt'+div_id).value;
+                    var logic1_val = document.getElementById('logic1_value'+div_id).value;
+                    var column_name = tags[div_id]["column"];
+
+                    if (column_name){
+                        tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val,"column": column_name}
+
+                        // console.log(logic1_op, logic1_val, column_name);
+                    
+
+
+                        var table = document.getElementById("data_tbl");
+                        var columnIndex = -1;
+
+                        // Find the index of the column
+                        var headers = table.querySelectorAll('th');
+
+                        for (var i = 0; i < headers.length; i++) {
+
+                            if (headers[i].textContent.replace(/[▲▼]/g, '') == column_name) {
+                            columnIndex = i;
+                            break;
+                            }
+                        }
+
+                        if (columnIndex === -1) {
+                            console.error("Column not found.");
+                            return;
+                        }
+                        console.log(logic1_op);
+
+                        if (logic1_op == 'equal'){
+                            equal_filter(logic1_val,table,columnIndex);
+                        }else if (logic1_op == 'not equal'){
+                            not_equal_filter(logic1_val,table,columnIndex);
+
+                        }
+                        else if (logic1_op == 'contains'){
+                            contains_filter(logic1_val,table,columnIndex);
+
+                        }else if (logic1_op == 'not contains'){
+                            not_contains_filter(logic1_val,table,columnIndex);
+
+                        }else if (logic1_op == 'starts with'){
+                            startswith_filter(logic1_val,table,columnIndex);
+                        }else if (logic1_op == 'ends with'){
+                            endswith_filter(logic1_val,table,columnIndex);
+
+                        }
+
+
+                    }else(alert("Column not found"))
+
+                    
+
+                    
+                });
+
+            }
+            else if (opt_val =='None'){
+                opt1 = document.getElementById('logic1_opt');
+                opt1.remove();
+            }
+    }
+
+    function filterDiv(div) {
+        var opt = document.getElementById('filter_option');
+
+        filtering(div,opt.value)
+        opt.addEventListener('change', (event) => {
+            var opt_val = event.currentTarget.value;
+            filtering(div,opt_val)
+            
+        });
+    }
+
+
+</script>
+</html>
