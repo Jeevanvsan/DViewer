@@ -21,7 +21,6 @@ class main:
                             self.files.append(file)
                     sources_list[sources['name']] = self.files
             
-
             self.source_data["sources_list"] = sources_list
         return self.source_data
     
