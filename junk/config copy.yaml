@@ -1,0 +1,37 @@
+from: 
+  name: sqlserver
+  user: jeevan.v
+  password: experion@123
+  servername: JEEVANV\SQLEXPRESS
+  localhost: None
+  database: AdventureWorksLT2022
+  table: SalesLT.Product
+to_:
+  name: sqlserver
+  user: jeevan.v
+  password: experion@123
+  servername: JEEVANV\SQLEXPRESS
+  localhost: None
+  database: Test
+  table: dbo.sample1
+
+to: 
+  name: csv
+  filename: output1.csv
+
+engine:
+  name: spark
+
+load_type: full_load
+
+snowflake:
+  name: snowflake
+  url: https://qr66981.ap-southeast-1.snowflakecomputing.com
+  account: upzopue-ij88177
+  user: JEEVANV
+  password: Jeevan@123
+  database: DATAFLO
+  schema: TEST1
+  table: SAMPLE1
+  warehouse: COMPUTE_WH
+  role: ACCOUNTADMIN

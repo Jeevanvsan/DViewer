@@ -173,9 +173,13 @@
             box-shadow: 0 0 8px 3px #D3D3D3;
           }
 
-          #source_name{
+          #source_name a{
+            font-size: 13px;
             cursor: pointer;
           }
+          #source_name h2{
+            font-size: 15px;
+            }
           #data_tbl{
             font-size: 12px;
             width: 100%;
@@ -400,6 +404,7 @@
                         <div class="panel" id="one-panel">
                             <div class="search_cont">
                                 <input type="text" id="searchInput" placeholder="Search ...">
+                                <p id="tbl_name">No source selected</p>
                                 <p id="loading_p"></p>
                             </div>
                             
@@ -478,20 +483,32 @@
         var source_ul = document.getElementById('source_name');
         for (key in settings['sources_list']){
             connection_name = key
+            source = settings['settings'][connection_name]['source'];
+            // for (key in settings['settings']){
+            //     if (data['name'] == connection_name){
+            //         source = data['source']
+            //     }
+            // }
+            
             source_list = settings['sources_list'][key]
             source_ul.innerHTML += `<h2>${key}</h2>`
             source_list.forEach(element => {
-                source_ul.innerHTML += `<li><a onclick="get_data('${connection_name}','${element}')"><p>${element}</p></a></li>` 
+                source_ul.innerHTML += `<li><a onclick="get_data('${connection_name}','${element}','${source}')"><p>${element}</p></a></li>` 
             });
 
         }
     }
 
-    function get_data(connection_name,name) {
+    function get_data(connection_name,name,source) {
+        document.getElementById('tbl_name').innerHTML = 'Loading...';
         document.getElementById('loading_p').innerHTML = 'Loading...';
         document.getElementById('table_cont').innerHTML = ''
+        document.getElementById('table_cont').innerHTML = ''
+        document.getElementById('container').innerHTML = ''
 
-        fetch(`/get_data/${connection_name}/${name}`) 
+
+
+        fetch(`/get_data/${connection_name}/${name}/${source}`) 
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -499,8 +516,19 @@
             return response.json();
         })
         .then(data => {
-            document.getElementById('loading_p').innerHTML = 'selected top 50';
+            document.getElementById('tbl_name').innerHTML = `${name}`;
+            document.getElementById('loading_p').innerHTML = 'selected top 100';
             document.getElementById('table_cont').innerHTML = data['html']
+
+            if (data['filters']){
+                for (id in data['filters']){
+                    console.log(id);
+                    console.log(data);
+
+                    addDiv(id,true);
+                    filterDiv(id,data['filters'][id],true);
+                }
+            }
         })
         .catch(error => {
             console.error('Error fetching data:', error);
@@ -712,9 +740,7 @@
                 if (mutation.addedNodes.length > 0) {
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeName === 'DIV') {
-                            filterDiv(node);
-                            
-
+                            // filterDiv(node);
                         }
                     });
                 }
@@ -747,20 +773,31 @@
 
     document.getElementById('addDivButton').addEventListener('click', addDiv);
 
-    function addDiv() {
+    function addDiv(id='fresh',ex_filter=false) {
+
+
+        if(id != 'fresh' && ex_filter == true) {
+            id_ = id
+        }
+        else{
+            id_ = "id" + Math.random().toString(16).slice(2);
+
+        }
+
+        console.log(id_);
+
         
-        // if(document.getElementById('data_tbl')){
-        if(1){
+        if(document.getElementById('data_tbl')){
+        // if(1){
 
             
-
             const container = document.getElementById('container');
 
             // Create div container
             const divContainer = document.createElement('div');
             divContainer.classList.add('div-container');
             // divContainer.className = "cls" + Math.random().toString(16).slice(2)
-            divContainer.id = "id" + Math.random().toString(16).slice(2)
+            divContainer.id = id_
 
             // Create header
             const divHeader = document.createElement('div');
@@ -775,14 +812,13 @@
             closeButton.classList.add('close-btn');
             closeButton.textContent = '×';
             closeButton.addEventListener('click', function(e) {
-                container.removeChild(divContainer);
                 removeFilterFromTable(divContainer.id);
+                container.removeChild(divContainer);
             });
             
             // Append close button to header
             divHeader.appendChild(closeButton);
 
-            // Create content
             const divContent = document.createElement('div');
             divContent.classList.add('div-content');
             const select = document.createElement('select');
@@ -806,6 +842,12 @@
 
             // Append container to main container
             container.appendChild(divContainer);
+
+            if (!ex_filter){
+                filterDiv(divContainer);
+            }
+
+
         }else{
             alert('choose any of the source')
         }
@@ -815,244 +857,55 @@
     var appliedFilters = {}; // Object to store applied filters
 
     function removeFilterFromTable(div_id,flag = true) {
-        // console.log(div_id);
-        var table = document.getElementById("data_tbl");
-        // tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val}
-        var columnIndex = -1;
-        var filters = tags[div_id];
-        var column_name = filters["column"];
-        var logic1_op = ''
-        var logic1_val = ''
-        if (filters["logic1_op"]){
-            logic1_op = filters["logic1_op"];
-        }
 
-        if (filters["logic1_val"]){
-            logic1_val = filters["logic1_val"];
-        }
-
-        var headers = table.querySelectorAll('th');
-        
-        for (var i = 0; i < headers.length; i++) {
-            // console.log(headers[i].textContent);
-            // console.log(column_name);
-            if (headers[i].textContent.replace(/[▲▼]/g, '') == column_name) {
-            columnIndex = i;
-            break;
+        fetch(`/filter_remove/${div_id}`) 
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('table_cont').innerHTML = data['html'] 
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            // Handle errors here
+        });
 
-        if (columnIndex === -1) {
-            console.error("Column not found.");
-            return;
-        }
-
-        if(logic1_op == "equal"){
-            for (var i = 1; i < table.rows.length; i++) {
-                var cell = table.rows[i].cells[columnIndex];
-                if (cell.textContent.trim() != logic1_val) {
-                    console.log("returning")
-                    table.rows[i].style.display = "";
-                } 
-            }
-        }else if (logic1_op == "not equal"){
-            for (var i = 1; i < table.rows.length; i++) {
-                var cell = table.rows[i].cells[columnIndex];
-                if (cell.textContent.trim() == logic1_val) {
-                    console.log("returning")
-                    table.rows[i].style.display = "";
-                } 
-            }
-        } else if (logic1_op == "contains"){
-            for (var i = 1; i < table.rows.length; i++) {
-                var cell = table.rows[i].cells[columnIndex];
-                if (!cell.textContent.trim().includes(logic1_val)) {
-                    table.rows[i].style.display = "";
-
-                } 
-            }
-        }else if (logic1_op == "not contains"){
-            for (var i = 1; i < table.rows.length; i++) {
-                var cell = table.rows[i].cells[columnIndex];
-                if (cell.textContent.trim().includes(logic1_val)) {
-                    table.rows[i].style.display = "";
-
-                } 
-            }
-        }else if (logic1_op == "starts with"){
-            for (var i = 1; i < table.rows.length; i++) {
-                var cell = table.rows[i].cells[columnIndex];
-                if (!cell.textContent.trim().startsWith(logic1_val)) {
-                    table.rows[i].style.display = "";
-
-                } 
-            }
-        }else if (logic1_op == "ends with"){
-            for (var i = 1; i < table.rows.length; i++) {
-                var cell = table.rows[i].cells[columnIndex];
-                if (!cell.textContent.trim().endsWith(logic1_val)) {
-                    table.rows[i].style.display = "";
-
-                } 
-            }
-        }
-
-
-        if (flag){
-            delete tags[div_id];
-        }
-        
-        // add remaining filters
-        if (tags){
-            for (key in tags){
-                if (key != div_id){
-                    column_name = tags[key]["column"];
-                    logic1_val = tags[key]["logic1_val"];
-                    for (var i = 0; i < headers.length; i++) {
-                        if (headers[i].textContent.replace(/[▲▼]/g, '') == column_name) {
-                        columnIndex = i;
-                        break;
-                        }
-                    }
-
-                    if (columnIndex === -1) {
-                        console.error("Column not found.");
-                        return;
-                    }
-
-                    if (tags[key]['logic1_op'] == "equal"){
-                        equal_filter(logic1_val,table,columnIndex)
-                    
-                    }else if (tags[key]['logic1_op'] == "not equal"){
-                        not_equal_filter(logic1_val,table,columnIndex)
-                    
-                    } else if (tags[key]['logic1_op'] == "contains"){
-                        contains_filter(logic1_val,table,columnIndex)
-                    
-                    } else if (tags[key]['logic1_op'] == "not contains"){
-                        not_contains_filter(logic1_val,table,columnIndex)
-                    
-                    } 
-                    else if (tags[key]['logic1_op'] == "starts with"){
-                        startswith_filter(logic1_val,table,columnIndex)
-                    
-                    }else if (tags[key]['logic1_op'] == "ends with"){
-                        endswith_filter(logic1_val,table,columnIndex)
-                    
-                    }
-                }
-            }
-        }
-
-        
-
-        
-        
-        
     }
-
-    // filter functions
-
-    function equal_filter(logic1_val,table,columnIndex){
-        for (var i = 1; i < table.rows.length; i++) {
-            var cell = table.rows[i].cells[columnIndex];
-            if (cell.textContent.trim() == logic1_val) {
-                table.rows[i].style.display = "";
-
-            } else {
-                table.rows[i].style.display = "none";
-
-            }
-        }
-    }
-
-    function not_equal_filter(logic1_val,table,columnIndex){
-        for (var i = 1; i < table.rows.length; i++) {
-            var cell = table.rows[i].cells[columnIndex];
-            if (cell.textContent.trim() != logic1_val) {
-                table.rows[i].style.display = "";
-
-            } else {
-                table.rows[i].style.display = "none";
-
-            }
-        }
-    }
-
-    function contains_filter(logic1_val,table,columnIndex){
-        for (var i = 1; i < table.rows.length; i++) {
-            var cell = table.rows[i].cells[columnIndex];
-            if (cell.textContent.trim().includes(logic1_val)) {
-                table.rows[i].style.display = "";
-
-            } else {
-                table.rows[i].style.display = "none";
-
-            }
-        }
-    }
-
-    function not_contains_filter(logic1_val,table,columnIndex){
-        for (var i = 1; i < table.rows.length; i++) {
-            var cell = table.rows[i].cells[columnIndex];
-            if (!cell.textContent.trim().includes(logic1_val)) {
-                table.rows[i].style.display = "";
-
-            } else {
-                table.rows[i].style.display = "none";
-
-            }
-        }
-    }
-    function startswith_filter(logic1_val,table,columnIndex){
-        for (var i = 1; i < table.rows.length; i++) {
-            var cell = table.rows[i].cells[columnIndex];
-            if (cell.textContent.trim().startsWith(logic1_val)) {
-                table.rows[i].style.display = "";
-
-            } else {
-                table.rows[i].style.display = "none";
-
-            }
-        }
-    }
-
-    function endswith_filter(logic1_val,table,columnIndex){
-        for (var i = 1; i < table.rows.length; i++) {
-            var cell = table.rows[i].cells[columnIndex];
-            if (cell.textContent.trim().endsWith(logic1_val)) {
-                table.rows[i].style.display = "";
-
-            } else {
-                table.rows[i].style.display = "none";
-
-            }
-        }
-    }
-
         
     function remove(element, div_id){
             // let index  = tags.indexOf(tag);
             // tags = [...tags.slice(0, index), ...tags.slice(index + 1)];
             // console.log(tags);
             removeFilterFromTable(div_id, false);
-            tags[div_id]["column"] = '';
+            tags[div_id]["column_name"] = '';
             element.parentElement.remove();
         }
 
-    function filtering(div,opt_val){
+    function filtering(div,opt_val,ex_filter){
         var div_id = div.id
-        console.log(tags);
-        if (opt_val =='condition'){
-                tags[div_id] = {"column":""}
+
+        if (ex_filter){
+            div_id = div
+            console.log('heare=====')
+            div_cont = document.getElementById(div_id)
+            if (opt_val['condition'] =='condition'){
+
+                tags[div_id] = opt_val
                 var columns = document.createElement('div');
                 columns.id = 'filter_columns';
                 columns.innerHTML = `<ul id="tag_ul_${div_id}"><input id="col_${div_id}" type="text" spellcheck="false"></ul>`;
-                div.appendChild(columns);
+                div_cont.appendChild(columns);
+
+
 
                 const ul = document.getElementById(`tag_ul_${div_id}`),
                     input = ul.querySelector("input");
 
+                
+                createTag()
 
                 // Function to create tags
                 function createTag() {
@@ -1061,8 +914,8 @@
                     //     let liTag = `<li>${tag} <i class="uit uit-multiply" onclick="remove(this, '${tag}')"></i></li>`;
                     //     ul.insertAdjacentHTML("afterbegin", liTag);
                     // });
-
-                    let liTag = `<li>${tags[div_id]["column"]} <i class="uit uit-multiply" onclick="remove(this, '${div_id}')"></i></li>`;
+                    console.log(tags);
+                    let liTag = `<li>${tags[div_id]["column_name"]} <i class="uit uit-multiply" onclick="remove(this, '${div_id}')"></i></li>`;
                     ul.insertAdjacentHTML("afterbegin", liTag);
                 }
 
@@ -1088,13 +941,13 @@
                     let droppedText = e.dataTransfer.getData("text");
                     
 
-                    if (droppedText.length > 0 && !tags[div_id]["column"].includes(droppedText)) {
+                    if (droppedText.length > 0 && !tags[div_id]["column_name"].includes(droppedText)) {
                         // if (tags.length < 10) {
                         //     tags.push(droppedText);
                         //     createTag();
                         // }
 
-                            tags[div_id]["column"] = droppedText;
+                            tags[div_id]["column_name"] = droppedText;
                             createTag();
                         }
                     
@@ -1131,17 +984,244 @@
                             //     tags.push(suggestion);
                             //     createTag();
                             // }
-                            if (!tags[div_id]["column"].includes(suggestion)) {
-                                console.log(tags[div_id])
+                            if (!tags[div_id]["column_name"].includes(suggestion)) {
 
-                                tags[div_id]["column"] = suggestion;
+                                tags[div_id]["column_name"] = suggestion;
                                 createTag();
                             }
                             input.value = "";
                             clearSuggestions();
                         });
+
+                        input.addEventListener("keypress", (e) => {
+                            if (e.key === "Enter") {
+                                if (suggestions.length === 1) {
+                                    if (!tags[div_id]["column_name"].includes(suggestion)) {
+
+                                    tags[div_id]["column_name"] = suggestion;
+                                    createTag();
+                                }
+                                input.value = "";
+                                clearSuggestions();
+                                }
+                            }
+                        });
                         ul.appendChild(suggestionItem);
                     });
+
+                    
+                }
+
+                // Clear previous suggestions
+                function clearSuggestions() {
+                    const suggestions = ul.querySelectorAll('.suggestion');
+                    suggestions.forEach(suggestion => suggestion.remove());
+                }
+
+                
+                logic_list = ['equal','not equal','contains', 'not contains', 'starts with', 'ends with']
+
+                var logic1_opt = document.createElement('select');
+                logic1_opt.id= 'logic1_opt'+div_id
+                logic1_opt.className= 'logic1_opt'
+
+
+                // var option1 = document.createElement("option");
+                // option1.text = "contains";
+                // option1.value = "contains";
+                // logic1_opt.appendChild(option1);
+
+                for (var i = 0; i < logic_list.length; i++) {
+                    var option = document.createElement("option");
+                    
+                    option.text = logic_list[i];
+                    option.value = logic_list[i];
+                    logic1_opt.appendChild(option);
+                    if (logic_list[i] == opt_val['logic1_op']){
+                        option.selected = true;
+                        // and the defaultSelected value to true:
+                        option.defaultSelected = true;
+                    }
+
+                    
+
+                }
+
+                div_cont.appendChild(logic1_opt);
+
+
+
+                var logic1_value = document.createElement('input');
+                logic1_value.type = 'text';
+                logic1_value.defaultValue = opt_val['logic1_val'];
+                logic1_value.id = 'logic1_value'+div_id;
+                logic1_value.className = 'logic1_value';
+                div_cont.appendChild(logic1_value);
+                div_cont.appendChild(document.createElement('br'));
+
+                var apply_btn = document.createElement('button');
+                apply_btn.textContent = 'Apply';
+                apply_btn.id = 'apply_btn'+div_id;
+                apply_btn.className = 'apply_btn';
+                div_cont.appendChild(apply_btn);
+
+                document.getElementById('apply_btn'+div_id).addEventListener('click', () =>{
+                    var logic1_op = document.getElementById('logic1_opt'+div_id).value;
+                    var logic1_val = document.getElementById('logic1_value'+div_id).value;
+                    var column_name = tags[div_id]["column_name"];
+
+                    if (column_name){
+                        tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val,"column_name": column_name,"condition":"condition"}
+
+
+                        // console.log(logic1_op, logic1_val, column_name);
+
+                        fetch(`/filter/${logic1_op}/${logic1_val}/${column_name}/${div_id}`) 
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            document.getElementById('table_cont').innerHTML = data['html'] 
+                        })
+                        .catch(error => {
+                            console.error('Error fetching data:', error);
+                            // Handle errors here
+                        });
+                    
+
+                    }else(alert("Column not found"))
+
+                    
+
+                    
+                });
+
+            }
+            else if (opt_val =='None'){
+                opt1 = document.getElementById('logic1_opt');
+                opt1.remove();
+            }
+        }
+        else{
+            console.log('heare++++++++++')
+
+            if (opt_val =='condition'){
+                tags[div_id] = {"column_name":""}
+                var columns = document.createElement('div');
+                columns.id = 'filter_columns';
+                columns.innerHTML = `<ul id="tag_ul_${div_id}"><input id="col_${div_id}" type="text" spellcheck="false"></ul>`;
+                div.appendChild(columns);
+
+                const ul = document.getElementById(`tag_ul_${div_id}`),
+                    input = ul.querySelector("input");
+
+
+                // Function to create tags
+                function createTag() {
+                    ul.querySelectorAll("li").forEach(li => li.remove());
+                    // tags.slice().reverse().forEach(tag => {
+                    //     let liTag = `<li>${tag} <i class="uit uit-multiply" onclick="remove(this, '${tag}')"></i></li>`;
+                    //     ul.insertAdjacentHTML("afterbegin", liTag);
+                    // });
+
+                    let liTag = `<li>${tags[div_id]["column_name"]} <i class="uit uit-multiply" onclick="remove(this, '${div_id}')"></i></li>`;
+                    ul.insertAdjacentHTML("afterbegin", liTag);
+                }
+
+                // Enable dragging on table headers
+                const headers = document.querySelectorAll("#data_tbl th");
+                headers.forEach(header => {
+                    header.setAttribute("draggable", true);
+                    header.style.cursor = 'grab';
+                    header.addEventListener("dragstart", (e) => {
+                        header.style.cursor = 'grabbing';
+
+                        e.dataTransfer.setData("text", e.target.innerText.replace(/[▲▼]/g, ''));
+                    });
+                });
+
+                // Enable dropping on the input field
+                input.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                });
+
+                input.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    let droppedText = e.dataTransfer.getData("text");
+                    
+
+                    if (droppedText.length > 0 && !tags[div_id]["column_name"].includes(droppedText)) {
+                        // if (tags.length < 10) {
+                        //     tags.push(droppedText);
+                        //     createTag();
+                        // }
+
+                            tags[div_id]["column_name"] = droppedText;
+                            createTag();
+                        }
+                    
+                });
+
+
+                // Attach the keyup event listener to the input field
+                input.addEventListener("keyup", (e) => {
+                    showSuggestions(e.target.value);
+                    // addTag(e);
+                });
+
+
+                // Extract column names from the table with id 'data_tbl'
+                function getColumnNames() {
+                    const table = document.getElementById("data_tbl");
+                    const headers = table.querySelectorAll("th");
+                    return Array.from(headers).map(header => header.innerText.replace(/[▲▼]/g, '').trim());
+                }
+
+                const columnNames = getColumnNames();
+
+                // Show suggestions based on input
+                function showSuggestions(value) {
+                    clearSuggestions();
+                    if (value.length === 0) return;
+                    const suggestions = columnNames.filter(name => name.toLowerCase().includes(value.toLowerCase()));
+                    suggestions.forEach(suggestion => {
+                        let suggestionItem = document.createElement('li');
+                        suggestionItem.textContent = suggestion;
+                        suggestionItem.classList.add('suggestion');
+                        suggestionItem.addEventListener('click', () => {
+                            // if (!tags.includes(suggestion)) {
+                            //     tags.push(suggestion);
+                            //     createTag();
+                            // }
+                            if (!tags[div_id]["column_name"].includes(suggestion)) {
+
+                                tags[div_id]["column_name"] = suggestion;
+                                createTag();
+                            }
+                            input.value = "";
+                            clearSuggestions();
+                        });
+
+                        input.addEventListener("keypress", (e) => {
+                            if (e.key === "Enter") {
+                                if (suggestions.length === 1) {
+                                    if (!tags[div_id]["column_name"].includes(suggestion)) {
+
+                                    tags[div_id]["column_name"] = suggestion;
+                                    createTag();
+                                }
+                                input.value = "";
+                                clearSuggestions();
+                                }
+                            }
+                        });
+                        ul.appendChild(suggestionItem);
+                    });
+
+                    
                 }
 
                 // Clear previous suggestions
@@ -1188,53 +1268,28 @@
                 document.getElementById('apply_btn'+div_id).addEventListener('click', () =>{
                     var logic1_op = document.getElementById('logic1_opt'+div_id).value;
                     var logic1_val = document.getElementById('logic1_value'+div_id).value;
-                    var column_name = tags[div_id]["column"];
+                    var column_name = tags[div_id]["column_name"];
 
                     if (column_name){
-                        tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val,"column": column_name}
+                        tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val,"column_name": column_name,"condition":"condition"}
+
 
                         // console.log(logic1_op, logic1_val, column_name);
-                    
 
-
-                        var table = document.getElementById("data_tbl");
-                        var columnIndex = -1;
-
-                        // Find the index of the column
-                        var headers = table.querySelectorAll('th');
-
-                        for (var i = 0; i < headers.length; i++) {
-
-                            if (headers[i].textContent.replace(/[▲▼]/g, '') == column_name) {
-                            columnIndex = i;
-                            break;
+                        fetch(`/filter/${logic1_op}/${logic1_val}/${column_name}/${div_id}`) 
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
                             }
-                        }
-
-                        if (columnIndex === -1) {
-                            console.error("Column not found.");
-                            return;
-                        }
-                        console.log(logic1_op);
-
-                        if (logic1_op == 'equal'){
-                            equal_filter(logic1_val,table,columnIndex);
-                        }else if (logic1_op == 'not equal'){
-                            not_equal_filter(logic1_val,table,columnIndex);
-
-                        }
-                        else if (logic1_op == 'contains'){
-                            contains_filter(logic1_val,table,columnIndex);
-
-                        }else if (logic1_op == 'not contains'){
-                            not_contains_filter(logic1_val,table,columnIndex);
-
-                        }else if (logic1_op == 'starts with'){
-                            startswith_filter(logic1_val,table,columnIndex);
-                        }else if (logic1_op == 'ends with'){
-                            endswith_filter(logic1_val,table,columnIndex);
-
-                        }
+                            return response.json();
+                        })
+                        .then(data => {
+                            document.getElementById('table_cont').innerHTML = data['html'] 
+                        })
+                        .catch(error => {
+                            console.error('Error fetching data:', error);
+                            // Handle errors here
+                        });
 
 
                     }else(alert("Column not found"))
@@ -1249,17 +1304,30 @@
                 opt1 = document.getElementById('logic1_opt');
                 opt1.remove();
             }
+        }
+        
     }
 
-    function filterDiv(div) {
+    function filterDiv(div,data='',ex_filter=false) {
         var opt = document.getElementById('filter_option');
+        // // filtering(div,opt.value)
+        console.log(ex_filter);
+        if(ex_filter ) {
+            console.log('true 0')
+            filtering(id,data,true)
 
-        filtering(div,opt.value)
-        opt.addEventListener('change', (event) => {
-            var opt_val = event.currentTarget.value;
-            filtering(div,opt_val)
+        }
+        else {
+            console.log('not true 0')
+            filtering(div,opt.value,false)
+
+        }
+
+        // opt.addEventListener('change', (event) => {
+        //     var opt_val = event.currentTarget.value;
+        //     filtering(div,opt_val)
             
-        });
+        // });
     }
 
 

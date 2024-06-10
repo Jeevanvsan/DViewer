@@ -1,2 +1,15 @@
-- source : csv
-  name : csv_connect
+
+
+sqlserver_connection2:
+  source: sqlserver
+  name: sqlserver_connection2
+  user: jeevan.v
+  password: experion@123
+  servername: JEEVANV\SQLEXPRESS
+  localhost: None
+  database: AdventureWorksLT2022
+  table: SalesLT.Product
+
+csv_connection:
+  source: csv
+  name: csv_connection
