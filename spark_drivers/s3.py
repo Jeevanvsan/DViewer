@@ -1,7 +1,7 @@
 import boto3
 
 
-class s3_driver(sparkBase):
+class s3(sparkBase):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
 

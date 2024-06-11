@@ -10,7 +10,7 @@ import sys
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
-class snowflake_driver(sparkBase):
+class snowflake(sparkBase):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
 

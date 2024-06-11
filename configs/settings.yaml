@@ -13,3 +13,7 @@ sqlserver_connection2:
 csv_connection:
   source: csv
   name: csv_connection
+
+parquet_connection:
+  source: parquet
+  name: parquet_connection

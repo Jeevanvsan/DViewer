@@ -2,7 +2,7 @@
 from colors import red, green, yellow
 import os
 
-class parquet_driver(sparkBase):
+class parquet(sparkBase):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
 

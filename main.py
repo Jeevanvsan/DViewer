@@ -47,8 +47,13 @@ class main:
         
 
         if ('csv' in source):
-            # df = pd.read_csv(f'inputs/{name}')
             data = self.spark.read.format("csv").load(f"inputs/{name}",header=True)
+            data.toPandas().to_parquet(f'fi/{name}.parquet',index=False)
+            data = data.toPandas()
+            return data
+        
+        if ('parquet' in source):
+            data = self.spark.read.format("parquet").load(f"inputs/{name}",header=True)
             data.toPandas().to_parquet(f'fi/{name}.parquet',index=False)
             data = data.toPandas()
             return data

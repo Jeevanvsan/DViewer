@@ -72,6 +72,7 @@
         flex-direction: column;
         align-items: center;
         margin-top: 5px;
+        height: 94vh;
         }
         .tab{
         cursor: pointer;
@@ -87,10 +88,12 @@
         background:#fffffff6;
         box-shadow: 0 2px 10px #00000080;
         height:60vh;
+        min-height: 20vh;
         width:95%;
         border-radius:3px;
         overflow:hidden;
         padding:20px;  
+
         }
         .panel{
         display:none;
@@ -103,12 +106,14 @@
             }
             #one:checked ~ .panels #one-panel,
             #two:checked ~ .panels #two-panel,
-            #three:checked ~ .panels #three-panel{
+            #three:checked ~ .panels #three-panel,
+            #four:checked ~ .panels #four-panel{
             display:block
             }
             #one:checked ~ .tabs #one-tab,
             #two:checked ~ .tabs #two-tab,
-            #three:checked ~ .tabs #three-tab{
+            #three:checked ~ .tabs #three-tab,
+            #four:checked ~ .tabs #four-tab{
             background:#fffffff6;
             color:#000;
             border-top: 3px solid #000;
@@ -227,18 +232,29 @@
           #value_cont{
             margin: 5px;
             height: 24vh;
+            min-height: 24vh;
             width: 99%;
             background-color: rgb(255, 255, 255);
             border-radius: 10px;
             box-shadow: 1px 2px 10px #000;
+            overflow: hidden;
+          }
+          #value_cont_cont{
+            padding: 10px;
+
+            height: 21vh;
+            min-height: 21vh;
             overflow: auto;
+
+            /* background-color: rgb(231, 59, 59); */
+
           }
 
-          #value_cont h4{
+          #value_cont_cont h4{
             padding: 10px 10px 0 10px;
           }
 
-          #value_cont pre{
+          #value_cont_cont pre{
             font-size: 18px;
             padding: 0 30px 30px 30px;
           }
@@ -365,6 +381,19 @@
             padding: 10px;
             cursor: pointer;
         }
+        .hidden_p{
+            display:none;
+        }
+        .resizer {
+            width: 64%;
+            cursor: row-resize;
+            height: 3px;
+            position: absolute;
+            background-color: #000000;
+        }
+        .resizer:hover{
+            background-color: #1f9cf6;
+        }
         
     </style>
 </head>
@@ -395,17 +424,22 @@
                     <input class="radio" id="one" name="group" type="radio" checked>
                     <input class="radio" id="two" name="group" type="radio">
                     <input class="radio" id="three" name="group" type="radio">
+                    <input class="radio" id="four" name="group" type="radio">
                     <div class="tabs">
                     <label class="tab" id="one-tab" for="one">Data</label>
                     <label class="tab" id="two-tab" for="two">Structure</label>
-                    <label class="tab" id="three-tab" for="three">Settings</label>
+                    <label class="tab" id="three-tab" for="three">Worksheet</label>
+                    <label class="tab" id="four-tab" for="four">Settings</label>
                     </div>
-                    <div class="panels">
+                    <div class="panels" id="panels">
                         <div class="panel" id="one-panel">
                             <div class="search_cont">
                                 <input type="text" id="searchInput" placeholder="Search ...">
                                 <p id="tbl_name">No source selected</p>
                                 <p id="loading_p"></p>
+                                <p id="hidden_con" class="hidden_p">dwdwd</p>
+                                <p id="hidden_source" class="hidden_p">wdwdwd</p>
+                                <p id="hidden_name" class="hidden_p">qddqd</p>
                             </div>
                             
                             <div id="table_cont">
@@ -424,13 +458,22 @@
                             </div>                           
                         </div>
                         <div class="panel" id="three-panel">
+                            <p>Worksheet</p>
+                        </div>
+                        <div class="panel" id="four-panel">
                             <p>Settings</p>
                         </div>
                     </div>
-                </div>
-                <div id="value_cont">
+                    <div id="value_cont" class="value_cont">
+                        <div class="resizer"></div>
+                        <div id="value_cont_cont" >
+        
+                        </div>
+                    </div>
+                    
 
                 </div>
+                
             </div>
             <div class="right_cont">
                 <div class="warpper_1">
@@ -448,7 +491,7 @@
                                 <div id="columnSelector" class="div-container minimized">
                                     <div class="div-header" onclick="toggleColumnSelector()">Column Selector</div>
                                     <div class="div-content">
-                                        <label><input type="checkbox" checked="true" id="selectAll"  > Select All</label>
+                                        <label><input type="checkbox"  id="selectAll"  > Select All</label>
                                         <div id="columnCheckboxes"></div>
                                     </div>
                                 </div>
@@ -469,6 +512,8 @@
 </body>
 <script>
     tags = {};
+    selected_cols = {};
+
 
     var settings = JSON.parse('[[ settings | tojson | safe]]');
 
@@ -484,12 +529,6 @@
         for (key in settings['sources_list']){
             connection_name = key
             source = settings['settings'][connection_name]['source'];
-            // for (key in settings['settings']){
-            //     if (data['name'] == connection_name){
-            //         source = data['source']
-            //     }
-            // }
-            
             source_list = settings['sources_list'][key]
             source_ul.innerHTML += `<h2>${key}</h2>`
             source_list.forEach(element => {
@@ -502,11 +541,13 @@
     function get_data(connection_name,name,source) {
         document.getElementById('tbl_name').innerHTML = 'Loading...';
         document.getElementById('loading_p').innerHTML = 'Loading...';
-        document.getElementById('table_cont').innerHTML = ''
-        document.getElementById('table_cont').innerHTML = ''
-        document.getElementById('container').innerHTML = ''
+        document.getElementById('table_cont').innerHTML = '';
+        document.getElementById('table_cont').innerHTML = '';
+        document.getElementById('container').innerHTML = '';
 
-
+        document.getElementById('hidden_con').innerHTML = '';
+        document.getElementById('hidden_source').innerHTML = '';
+        document.getElementById('hidden_name').innerHTML = '';
 
         fetch(`/get_data/${connection_name}/${name}/${source}`) 
         .then(response => {
@@ -520,6 +561,10 @@
             document.getElementById('loading_p').innerHTML = 'selected top 100';
             document.getElementById('table_cont').innerHTML = data['html']
 
+            document.getElementById('hidden_con').innerHTML = connection_name
+            document.getElementById('hidden_source').innerHTML = source
+            document.getElementById('hidden_name').innerHTML = name
+
             if (data['filters']){
                 for (id in data['filters']){
                     console.log(id);
@@ -529,6 +574,43 @@
                     filterDiv(id,data['filters'][id],true);
                 }
             }
+            console.log(data);
+            const table = document.getElementById('data_tbl');
+            const rows = table.querySelectorAll('tr');
+
+            if(Object.keys(data['selected_cols']).length != 0){
+                indexes = data['selected_cols']
+                
+
+                connection_name = document.getElementById('hidden_con').innerHTML 
+                source = document.getElementById('hidden_source').innerHTML 
+                name = document.getElementById('hidden_name').innerHTML 
+
+                fid = `${connection_name}_${source}_${name}`
+                if (!selected_cols[fid]){
+                    selected_cols[fid] = {}
+                }
+
+                generateColumnSelector(table, data['selected_cols'],ex_filter = true);
+
+
+                for (key in indexes){
+                    index = key;
+                    value = indexes[key];
+                    rows.forEach(row => {
+                    const cells = row.querySelectorAll(`th, td`);
+                    if (cells[index]) {
+                        cells[index].style.display = value;
+                        selected_cols[fid][index] = value;
+
+                    }
+                });
+                }
+            }else{
+                console.log("11");
+                generateColumnSelector(table);
+            }
+
         })
         .catch(error => {
             console.error('Error fetching data:', error);
@@ -585,10 +667,10 @@
                     var column = headerCell.innerHTML.replace(/[▲▼]/g, '');
                     try {
                         const correctedJsonString = val.replace(/'/g, '"');
-
+                        console.log(correctedJsonString);
                         val = JSON.parse(correctedJsonString);
                         console.log(val);
-                        document.getElementById('value_cont').innerHTML = `<h4>${column}</h4><pre>${JSON.stringify(val, undefined, 2)}</pre>`
+                        document.getElementById('value_cont_cont').innerHTML = `<h4>${column}</h4><pre>${JSON.stringify(val, undefined, 2)}</pre>`
 
                     } catch (e) {
 
@@ -644,7 +726,18 @@
     // filter
 
     document.getElementById('selectAll').addEventListener('change', (event) =>{
-        console.log(event.currentTarget.checked);
+        connection_name = document.getElementById('hidden_con').innerHTML 
+        source = document.getElementById('hidden_source').innerHTML 
+        name = document.getElementById('hidden_name').innerHTML 
+
+        fid = `${connection_name}_${source}_${name}`
+        if (!selected_cols[fid]){
+            selected_cols[fid] = {}
+        }
+
+        selected_cols[fid] = {"-1":event.currentTarget.checked};
+        
+        // console.log(event.currentTarget.checked);
         const checkboxes = document.querySelectorAll('#columnCheckboxes input[type="checkbox"]');
         checkboxes.forEach(checkbox => {
                 checkbox.checked = event.currentTarget.checked;
@@ -657,39 +750,120 @@
                     const cells = row.querySelectorAll(`th, td`);
                     if (cells[index]) {
                         cells[index].style.display = checkbox.checked ? '' : 'none';
+
                     }
                 });
             
             });
+
+            fetch(`/column_filter/${selected_cols}`,{
+            headers : {
+            'Content-Type' : 'application/json'
+            },
+            method : 'POST',
+            body : JSON.stringify(selected_cols)
+            }) 
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // document.getElementById('table_cont').innerHTML = data['html'] 
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                // Handle errors here
+            });
     });
 
 
-    function generateColumnSelector(table) {
+    function generateColumnSelector(table, columns,ex_filter = false) {
         // const table = document.getElementById('data_tbl');
-        const headers = table.querySelectorAll('th');
-        const columnCheckboxes = document.getElementById('columnCheckboxes');
+        if(!ex_filter) {
+            console.log('no ex_filter')
+            const headers = table.querySelectorAll('th');
+            const columnCheckboxes = document.getElementById('columnCheckboxes');
 
-        columnCheckboxes.innerHTML = ''
+            document.getElementById('selectAll').checked = true;
 
-        headers.forEach((header, index) => {
-            const label = document.createElement('label');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = true;
-            checkbox.dataset.column = index;
-            checkbox.onchange = toggleColumn;
 
-            label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(header.textContent.replace(/[▲▼]/g, '')));
-            columnCheckboxes.appendChild(label);
-            columnCheckboxes.appendChild(document.createElement('br'));
+            columnCheckboxes.innerHTML = ''
+
+            headers.forEach((header, index) => {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = true;
+                checkbox.dataset.column = index;
+                checkbox.onchange = toggleColumn;
+
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(header.textContent.replace(/[▲▼]/g, '')));
+                columnCheckboxes.appendChild(label);
+                columnCheckboxes.appendChild(document.createElement('br'));
         });
+        }else{
+            console.log(columns)
+            // for (key in columns){
+                const headers = table.querySelectorAll('th');
+                const columnCheckboxes = document.getElementById('columnCheckboxes');
+    
+                columnCheckboxes.innerHTML = ''
+    
+                headers.forEach((header, index) => {
+                    const label = document.createElement('label');
+                    checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = true;
+
+                    if (key == '-1' && columns[key] == true){
+                        document.getElementById('selectAll').checked = true;
+                    }
+
+                    checkbox.dataset.column = index;
+                    checkbox.onchange = toggleColumn;
+    
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(header.textContent.replace(/[▲▼]/g, '')));
+                    columnCheckboxes.appendChild(label);
+                    columnCheckboxes.appendChild(document.createElement('br'));
+
+                    const allCheckboxes = document.querySelectorAll('#columnCheckboxes input[type="checkbox"]');
+                    for (let i = 0; i < allCheckboxes.length; i++){
+                        if (columns[i] !='none'){
+                            document.getElementById('selectAll').checked = false;
+                            allCheckboxes[i].checked = true;
+
+                        
+                        }else{
+                            allCheckboxes[i].checked = false;
+
+                        }
+
+                    }
+                    
+                    
+            });
+        // }
+        
     }
+}
 
     function toggleColumn() {
         const index = this.dataset.column;
         const table = document.getElementById('data_tbl');
         const rows = table.querySelectorAll('tr');
+
+        connection_name = document.getElementById('hidden_con').innerHTML 
+        source = document.getElementById('hidden_source').innerHTML 
+        name = document.getElementById('hidden_name').innerHTML 
+
+        fid = `${connection_name}_${source}_${name}`
+        if (!selected_cols[fid]){
+            selected_cols[fid] = {}
+        }
 
         rows.forEach(row => {
             const cells = row.querySelectorAll(`th, td`);
@@ -698,10 +872,50 @@
             }
         });
 
+
+        
+
+
+
         // Check if all individual checkboxes are checked
         const allCheckboxes = document.querySelectorAll('#columnCheckboxes input[type="checkbox"]');
+        for (let i = 0; i < allCheckboxes.length; i++){
+            selected_cols[fid][i] = allCheckboxes[i].checked ? '' : 'none';
+
+        }
         const allChecked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
         document.getElementById('selectAll').checked = allChecked;
+
+        if (allChecked){
+            selected_cols[fid] = {'-1':allChecked}
+        }
+        else if ('-1' in selected_cols[fid]){
+            selected_cols[fid]['-1'] = allChecked
+
+        }
+        console.log(selected_cols)
+
+
+        fetch(`/column_filter/${selected_cols}`,{
+            headers : {
+            'Content-Type' : 'application/json'
+        },
+        method : 'POST',
+        body : JSON.stringify(selected_cols)
+        }) 
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // document.getElementById('table_cont').innerHTML = data['html'] 
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            // Handle errors here
+        });
     }
 
     function toggleColumnSelector() {
@@ -726,7 +940,7 @@
                             attachClickHandlerToHeaders(node);
                             attachClickHandlerToCell(node);
                             attachClickHandlerToSort(node);
-                            generateColumnSelector(node);
+                            // generateColumnSelector(node);
                             tableRows = Array.from(node.querySelectorAll('tbody tr')); // Store all table rows
 
                         }
@@ -1330,6 +1544,35 @@
         // });
     }
 
+    const resizer = document.querySelector('.resizer');
+    const topPanel = document.querySelector('.panels');
+    const bottomPanel = document.querySelector('#value_cont');
+    const bottomPanel_val = document.querySelector('#value_cont_cont');
 
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    function onMouseMove(e) {
+        if (!isResizing) return;
+
+        const totalHeight = topPanel.offsetHeight + bottomPanel.offsetHeight + resizer.offsetHeight;
+        const newTopHeight = e.clientY - topPanel.offsetTop;
+        const newBottomHeight = totalHeight - newTopHeight - resizer.offsetHeight;
+
+        topPanel.style.height = `${newTopHeight}px`;
+        bottomPanel.style.height = `${newBottomHeight}px`;
+        bottomPanel_val.style.height = `${newBottomHeight}px`;
+    }
+
+    function onMouseUp() {
+        isResizing = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
 </script>
 </html>
