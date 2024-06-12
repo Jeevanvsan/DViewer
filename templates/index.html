@@ -560,41 +560,16 @@
                 <div class="warpper">
                     <input class="radio" id="one" name="group" type="radio" checked>
                     <input class="radio" id="two" name="group" type="radio">
-                    <input class="radio" id="three" name="group" type="radio" >
+                    <input class="radio" id="three" name="group" type="radio"  >
                     <input class="radio" id="four" name="group" type="radio">
                     <div class="tabs">
-                    <label class="tab" id="one-tab" for="one">Data</label>
-                    <label class="tab" id="two-tab" for="two">Structure</label>
-                    <label class="tab" id="three-tab" for="three">Worksheet</label>
+                    <label class="tab" id="one-tab" for="one">Worksheet</label>
+                    <label class="tab" id="two-tab" for="two">Data</label>
+                    <label class="tab" id="three-tab" for="three">Structure</label>
                     <label class="tab" id="four-tab" for="four">Settings</label>
                     </div>
                     <div class="panels" id="panels">
                         <div class="panel" id="one-panel">
-                            <div class="search_cont">
-                                <input type="text" id="searchInput" placeholder="Search ...">
-                                <p id="tbl_name">No source selected</p>
-                                <p id="loading_p"></p>
-                                <p id="hidden_con" class="hidden_p"></p>
-                                <p id="hidden_source" class="hidden_p"></p>
-                                <p id="hidden_name" class="hidden_p"></p>
-                            </div>
-                            
-                            <div id="table_cont">
-                                <table>
-
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="panel" id="two-panel">
-                            <input type="text" id="searchInput" onkeyup="myFunction()" placeholder="Search ...">
-                            <div id="table_cont">
-                                <table>
-
-                                </table>
-                            </div>                           
-                        </div>
-                        <div class="panel" id="three-panel">
                             <div id="query_main">
                                 <div id="query_top">
                                     <button id="query_run_btn" onclick="run_query()">run</button>
@@ -603,12 +578,38 @@
                                 </div>
                                 <div id="query_sheet">
                                     <div id="sheet_middle">
-                                        <textarea id="query_inp">-- type your sql query here</textarea>
+                                        <textarea id="query_inp"></textarea>
                                     </div>
                                 </div>
                             </div>
-
                             
+                            
+                           
+                        </div>
+
+                        <div class="panel" id="two-panel">
+                            <div class="search_cont">
+                                <input type="text" id="searchInput" placeholder="Search ...">
+                                <p id="tbl_name">No source selected</p>
+                                <p id="loading_p"></p>
+                                <p id="hidden_con" class="hidden_p"></p>
+                                <p id="hidden_source" class="hidden_p"></p>
+                                <p id="hidden_name" class="hidden_p"></p>
+                            </div>
+                            <div id="table_cont">
+                                <table>
+
+                                </table>
+                            </div>
+                                                       
+                        </div>
+                        <div class="panel" id="three-panel">
+                            <input type="text" id="searchInput" onkeyup="myFunction()" placeholder="Search ...">
+                            <div id="table_cont">
+                                <table>
+
+                                </table>
+                            </div>
                         </div>
                         <div class="panel" id="four-panel">
                             <p>Settings</p>
@@ -620,8 +621,6 @@
         
                         </div>
                     </div>
-                    
-
                 </div>
                 
             </div>
@@ -1814,22 +1813,6 @@
         }
     }
 
-    // Use CodeMirror's SQL hinting to get SQL suggestions
-    // var sqlHint = CodeMirror.hint.sql(editor, options);
-    // var sqlList = sqlHint.list;
-
-    // // Filter SQL suggestions based on current word
-    // var filteredSqlList = sqlList.filter(function(item) {
-    //     return item.text.toLowerCase().indexOf(word.toLowerCase()) > -1;
-    // });
-
-    // // Combine custom and SQL suggestions
-    // var combinedList = customList.concat(filteredSqlList.map(function(item) {
-    //     return item.text;
-    // }));
-
-
-
 
     // Step 4: Configure CodeMirror to use custom suggestions
     editor.on('inputRead', function onChange(editor, input) {
@@ -1869,6 +1852,10 @@
 
     editor.on("change", function(cm, changeObj) {
         checkWords();
+    });
+
+    document.getElementById('three-tab').addEventListener('click', function() {
+        
     });
 
   

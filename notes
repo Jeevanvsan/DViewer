@@ -1,3 +1,29 @@
-Filter
-    - user can select columns only want to see.
+connection to add -
+    * xml
+    * snowflake
+    * postgres
+    * json
+    * API
+    
+Data -
+    * can create new tables by joining existing tables on same connection / different connection
+    * create new table on same connection on user specified
+    * can create calculated columns 
+
+settings -
+    * implementation of aws secrete manager
+
+query sheet -
+    * prevent insert,update,delete... statements
+
+sqlserver_connection2:
+  source: sqlserver
+  name: sqlserver_connection2
+  user: jeevan.v
+  password: experion@123
+  server: JEEVANV\SQLEXPRESS
+  localhost: None
+  database: AdventureWorksLT2022
+  schema: SalesLT
+
     

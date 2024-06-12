@@ -203,7 +203,7 @@ class main:
             connection = data['connection']
             table = data['table']
 
-            print(query)
+            # print(query)
 
 
             source = settings[connection]['source']
@@ -219,12 +219,46 @@ class main:
             # df.show()
 
             df.createOrReplaceTempView(str(table))
-            filtered_df = self.spark.sql(query)
-            return filtered_df.toPandas()
+
+            checked_query = self.check_query(query)
+
+            if checked_query:
+                filtered_df = self.spark.sql(query)
+            # filtered_df = self.spark.sql(query)
+                return filtered_df.toPandas()
+            else:
+                return {'error':  "provide only DQL queries"}
 
             # filtered_df.show()
         except Exception as e:
             return {'error':  str(e)}
+
+
+    def check_query(self, query):
+        config = FluffConfig(overrides=dict(dialect='tsql'))
+        tokens, _ = Lexer(config=config).lex(query)
+        tree = Parser(config=config).parse(tokens)
+        records = tree.as_record(code_only=False, show_raw=True)
+
+        parsed = dict([*list(records.items())])
+
+        dql_keywords = ['SELECT', 'DESCRIBE', 'SHOW', 'EXPLAIN', 'WITH_COMPOUND']
+
+        # print(parsed)
+
+        stmts = json_path.rtn_get_json_keypaths(parsed,'file.batch.statement', top_level=True)[0]
+        for key, value in stmts.items():
+            print(key)
+            if str(key.replace('_statement','')).upper() in dql_keywords:
+                return True
+            else:
+                return False
+
+        # return any(str(key.replace('_statement','')).upper() in dql_keywords for key in stmts)
+
+            
+        
+
 
 
 
