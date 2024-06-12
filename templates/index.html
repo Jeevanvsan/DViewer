@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/thinline.css">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/eclipse.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/sql-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/comment/comment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/comment/continuecomment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/keymap/sublime.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/show-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/sql/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/hint/sql-hint.min.js"></script>
+
     <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
 
     <title>DViewer</title>
@@ -241,7 +255,6 @@
           }
           #value_cont_cont{
             padding: 10px;
-
             height: 21vh;
             min-height: 21vh;
             overflow: auto;
@@ -395,6 +408,130 @@
             background-color: #1f9cf6;
         }
         
+        #query_main{
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #query_top{
+            border-bottom: 1px solid #b4b1b1;
+            height: 4vh;
+            padding-bottom: 10px;
+        }
+
+        #query_sheet{
+            overflow: hidden;
+            height:57vh;
+            display: flex;
+            flex-direction: row;
+        }
+
+        #sheet_middle{
+            height:56vh;
+            width: 100%;
+        }
+        .CodeMirror {
+            margin-top: 10px;
+            height: 56vh;
+            font-size: 17px;
+            }
+        /* #query_inp{
+            width: 100%;
+            height: 56vh;
+            box-sizing: border-box;
+        }
+        textarea {
+
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            resize: none;
+            border: none;
+            line-height: 1.5; 
+            margin: 0;
+        }
+        textarea:focus {
+            outline: none; 
+            border: none; 
+        } */
+
+        #data_tbl_query{
+            font-size: 12px;            
+            user-select: none;
+            background: white;
+            border-radius:3px;
+            border-collapse: collapse;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            animation: float 5s infinite
+        }
+        #data_tbl_query td:hover{
+            border: solid 2px rgba(0, 183, 255, 0.83);
+        }
+
+        #data_tbl_query th{
+            position: sticky;
+            top: 0;
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+
+        }
+        #data_tbl_query td{
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .CodeMirror-hints {
+            background-color: #f5f5f5; 
+            color: #333; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            font-family: Arial, sans-serif; 
+            font-size: 14px; 
+        }
+        .CodeMirror-hint {
+            padding: 4px 8px; 
+        }
+        .CodeMirror-hint-active {
+            background-color: #ccc; 
+        }
+        #query_run_btn{
+            background-color: #000;
+            color: #fff;
+            padding: 5px 15px;
+            font-size: 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        #connections_select{
+            background-color: #000;
+            color: #fff;
+            padding: 5px 15px;
+            font-size: 15px;
+            border-radius: 3px;
+        }
+        #table_select{
+            background-color: #000;
+            color: #fff;
+            padding: 5px 15px;
+            font-size: 15px;
+            border-radius: 3px;
+        }
+
+        #addDivButton{
+            background-color: #000;
+            color: #fff;
+            padding: 5px 15px;
+            font-size: 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
@@ -423,7 +560,7 @@
                 <div class="warpper">
                     <input class="radio" id="one" name="group" type="radio" checked>
                     <input class="radio" id="two" name="group" type="radio">
-                    <input class="radio" id="three" name="group" type="radio">
+                    <input class="radio" id="three" name="group" type="radio" >
                     <input class="radio" id="four" name="group" type="radio">
                     <div class="tabs">
                     <label class="tab" id="one-tab" for="one">Data</label>
@@ -437,9 +574,9 @@
                                 <input type="text" id="searchInput" placeholder="Search ...">
                                 <p id="tbl_name">No source selected</p>
                                 <p id="loading_p"></p>
-                                <p id="hidden_con" class="hidden_p">dwdwd</p>
-                                <p id="hidden_source" class="hidden_p">wdwdwd</p>
-                                <p id="hidden_name" class="hidden_p">qddqd</p>
+                                <p id="hidden_con" class="hidden_p"></p>
+                                <p id="hidden_source" class="hidden_p"></p>
+                                <p id="hidden_name" class="hidden_p"></p>
                             </div>
                             
                             <div id="table_cont">
@@ -458,7 +595,20 @@
                             </div>                           
                         </div>
                         <div class="panel" id="three-panel">
-                            <p>Worksheet</p>
+                            <div id="query_main">
+                                <div id="query_top">
+                                    <button id="query_run_btn" onclick="run_query()">run</button>
+                                    <select id="connections_select"></select>
+                                    <select id="table_select"></select>
+                                </div>
+                                <div id="query_sheet">
+                                    <div id="sheet_middle">
+                                        <textarea id="query_inp">-- type your sql query here</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
                         </div>
                         <div class="panel" id="four-panel">
                             <p>Settings</p>
@@ -513,12 +663,42 @@
 <script>
     tags = {};
     selected_cols = {};
+    qry_tbls = [];
 
 
     var settings = JSON.parse('[[ settings | tojson | safe]]');
 
     if (settings){
         get_settings(settings);
+            
+        wrksheet_con_select = document.getElementById('connections_select');
+        wrksheet_tbl_select = document.getElementById('table_select');
+
+        console.log(settings);
+        for (key in settings['sources_list']) {
+            option = document.createElement("option");
+            option.text = key;
+            option.value = key;
+            wrksheet_con_select.appendChild(option)
+        }
+        source = settings['settings'][wrksheet_con_select.value]['source'];
+
+
+        qry_tbls = settings['sources_list'][wrksheet_con_select.value];
+        qry_tbls = qry_tbls.map(filename => filename.replace(`.${source}`, ""));
+
+
+
+        settings['sources_list'][wrksheet_con_select.value].forEach((tbls)=>{
+            tbls = tbls.replace(`.${source}`,'');
+            option = document.createElement("option");
+            option.text = tbls;
+            option.value = tbls;
+            wrksheet_tbl_select.appendChild(option)
+        });
+        
+
+        console.log(wrksheet_con_select.value);
     }
     function addConnection(){
     alert('Connection');
@@ -532,7 +712,7 @@
             source_list = settings['sources_list'][key]
             source_ul.innerHTML += `<h2>${key}</h2>`
             source_list.forEach(element => {
-                source_ul.innerHTML += `<li><a onclick="get_data('${connection_name}','${element}','${source}')"><p>${element}</p></a></li>` 
+                source_ul.innerHTML += `<li><a onclick="get_data('${connection_name}','${element}','${source}')"><p>${element.replace(`.${source}`,'')}</p></a></li>` 
             });
 
         }
@@ -1574,5 +1754,309 @@
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
     }
+
+
+    // Work sheet
+
+    
+    function syncScroll() {
+        const textarea = document.getElementById('query_inp');
+        const lineNumbers = document.getElementById('sheet_left');
+        lineNumbers.scrollTop = textarea.scrollTop;
+    }
+
+    editor = CodeMirror.fromTextArea(document.getElementById('query_inp'), {
+      mode: 'text/x-sql',
+      theme: 'eclipse',
+      lineNumbers: true,
+      keyMap: 'sublime', 
+      extraKeys: {
+        'Ctrl-/': 'toggleComment' ,
+        'Tab': 'autocomplete' 
+      }
+    });
+    function customHint(editor, options) {
+        var cur = editor.getCursor();
+        var token = editor.getTokenAt(cur);
+        var start = token.start;
+        var end = cur.ch;
+        var word = token.string.slice(0, end - start); // Remove conversion to lowercase for case-sensitive matching
+        var list = qry_tbls;
+
+        // Filter list based on current word
+        var customList = list.filter(function(item) {
+            return item.indexOf(word) > -1; // Check if the typed text exists in the suggestion (case-sensitive)
+        });
+
+        // Use CodeMirror's SQL hinting to get SQL suggestions
+        var sqlHint = CodeMirror.hint.sql(editor, options);
+        var sqlList = sqlHint.list;
+
+        // Filter SQL suggestions based on current word
+        var filteredSqlList = sqlList.filter(function(item) {
+            return item.text.toLowerCase().indexOf(word.toLowerCase()) > -1;
+        });
+
+        // Combine custom and SQL suggestions
+        var combinedList = customList.concat(filteredSqlList.map(function(item) {
+            return item.text;
+        }));
+
+        // Show suggestions only if there's a match
+        if (combinedList.length > 0) {
+            return {
+            list: combinedList,
+            from: CodeMirror.Pos(cur.line, start),
+            to: CodeMirror.Pos(cur.line, end)
+            };
+        } else {
+            return null; // Return null to hide suggestions
+        }
+    }
+
+    // Use CodeMirror's SQL hinting to get SQL suggestions
+    // var sqlHint = CodeMirror.hint.sql(editor, options);
+    // var sqlList = sqlHint.list;
+
+    // // Filter SQL suggestions based on current word
+    // var filteredSqlList = sqlList.filter(function(item) {
+    //     return item.text.toLowerCase().indexOf(word.toLowerCase()) > -1;
+    // });
+
+    // // Combine custom and SQL suggestions
+    // var combinedList = customList.concat(filteredSqlList.map(function(item) {
+    //     return item.text;
+    // }));
+
+
+
+
+    // Step 4: Configure CodeMirror to use custom suggestions
+    editor.on('inputRead', function onChange(editor, input) {
+      CodeMirror.showHint(editor, customHint, {completeSingle: false});
+    });
+
+    function checkWord(word) {
+        if (qry_tbls.includes(word)) {
+            console.log(word);
+
+            document.getElementById('table_select').value = word;
+            console.log(word + " found in the list!");
+        }
+    }
+
+    editor.on("keydown", function(cm, event) {
+        if (event.keyCode === 32) { // 32 is the keycode for space
+            var cursor = cm.getCursor();
+            var line = cm.getLine(cursor.line);
+            var word = line.slice(0, cursor.ch).split(" ").pop();
+            checkWord(word);
+        }
+    });
+
+    function checkWords() {
+        var text = editor.getValue();
+        var words = text.split(/\s+/);
+        words.forEach(function(word) {
+        if (qry_tbls.includes(word)) {
+            document.getElementById('table_select').value = word;
+
+            console.log(word + " found in the list!");
+            // Call your function here if a word matches
+        }
+        });
+    }
+
+    editor.on("change", function(cm, changeObj) {
+        checkWords();
+    });
+
+  
+    function run_query(){
+        // const query = document.getElementById('query_inp').value;
+        const query = editor.getValue();
+
+        wrksheet_con_select = document.getElementById('connections_select').value;
+        wrksheet_tbl_select = document.getElementById('table_select').value;
+        
+        console.log(query);
+
+        fetch(`/run_query`,{
+        headers : {
+        'Content-Type' : 'application/json'
+        },
+        method : 'POST',
+        body : JSON.stringify({"query" : query,"connection":wrksheet_con_select,"table":wrksheet_tbl_select})
+        }) 
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+                            
+            document.getElementById('value_cont_cont').innerHTML = `<div id="table_cont">${data['html']}</div>` 
+            document.getElementById('value_cont_cont').style.overflow = 'hidden'
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            // Handle errors here
+        });
+        
+    }
+    
+    // wrksheet_con_select = document.getElementById('connections_select');
+    // wrksheet_tbl_select = document.getElementById('table_select');
+
+    document.getElementById('connections_select').addEventListener('change', ()=>{
+        wrksheet_con_select = document.getElementById('connections_select');
+        wrksheet_tbl_select = document.getElementById('table_select');
+
+        document.getElementById('table_select').innerHTML = ''
+
+        source = settings['settings'][wrksheet_con_select.value]['source'];
+
+        qry_tbls = settings['sources_list'][wrksheet_con_select.value]
+        qry_tbls = qry_tbls.map(filename => filename.replace(`.${source}`, ""));
+
+
+
+        settings['sources_list'][wrksheet_con_select.value].forEach((tbls)=>{
+            tbls = tbls.replace(`.${source}`,'');
+            option = document.createElement("option");
+
+            option.text = tbls;
+            option.value = tbls;
+            wrksheet_tbl_select.appendChild(option)
+        });
+    });
+
+
+    // const textarea = document.getElementById('query_inp');
+    // const suggestionsDiv = document.getElementById('suggestions');
+
+    // textarea.addEventListener('keydown', function(event) {
+    // const cursorPosition = this.selectionStart;
+    // const words = this.value.substring(0, cursorPosition).split(/\s+/);
+    // const currentWord = words[words.length - 1];
+
+
+    //     if (event.key === 'Tab' && suggestionsDiv.style.display === 'block') {
+    //         event.preventDefault(); // Prevent tabbing away from textarea
+    //         const firstSuggestion = suggestionsDiv.querySelector('li');
+    //         if (firstSuggestion) {
+    //             words[words.length - 1] = firstSuggestion.innerText;
+    //             this.value = words.join(' ') + this.value.substring(cursorPosition);
+    //             suggestionsDiv.style.display = 'none';
+    //         }
+    //     } else if (currentWord.length === 0 || event.key === ' ' || event.key === 'Backspace' || event.key === 'Delete') {
+    //         suggestionsDiv.style.display = 'none';
+    //         return;
+    //     } else {
+    //         fetchSuggestions(currentWord);
+    //     }
+    // });
+    // suggestions = [
+    //                     "SELECT",
+    //                     "FROM",
+    //                     "WHERE",
+    //                     "GROUP BY",
+    //                     "HAVING",
+    //                     "ORDER BY",
+    //                     "JOIN",
+    //                     "INNER JOIN",
+    //                     "LEFT JOIN",
+    //                     "RIGHT JOIN",
+    //                     "FULL JOIN",
+    //                     "CROSS JOIN",
+    //                     "UNION",
+    //                     "UNION ALL",
+    //                     "DISTINCT",
+    //                     "LIMIT",
+    //                     "OFFSET",
+    //                     "AS",
+    //                     "ON",
+    //                     "AND",
+    //                     "OR",
+    //                     "NOT",
+    //                     "IN",
+    //                     "BETWEEN",
+    //                     "LIKE",
+    //                     "IS NULL",
+    //                     "IS NOT NULL",
+    //                     "EXISTS",
+    //                     "CASE",
+    //                     "WHEN",
+    //                     "THEN",
+    //                     "ELSE",
+    //                     "END",
+    //                     "CAST",
+    //                     "CONVERT",
+    //                     "AVG",
+    //                     "SUM",
+    //                     "MIN",
+    //                     "MAX",
+    //                     "COUNT",
+    //                     "COUNT DISTINCT",
+    //                     "FIRST",
+    //                     "LAST",
+    //                     "COALESCE",
+    //                     "NULLIF",
+    //                     "LEAD",
+    //                     "LAG",
+    //                     "OVER",
+    //                     "PARTITION BY",
+    //                     "ROWS BETWEEN",
+    //                     "RANGE BETWEEN",
+    //                     "CURRENT ROW",
+    //                     "CURRENT_DATE",
+    //                     "CURRENT_TIMESTAMP",
+    //                     "DATE_ADD",
+    //                     "DATE_SUB",
+    //                     "DATE_FORMAT",
+    //                     "EXTRACT",
+    //                     "TO_DATE",
+    //                     "TO_TIMESTAMP"
+    //                 ]
+
+    // function fetchSuggestions(input) {
+        
+
+    //     const filteredSuggestions = suggestions.filter(suggestion => suggestion.toLowerCase().startsWith(input.toLowerCase()));
+    //     displaySuggestions(filteredSuggestions);
+    // }
+    
+
+
+    // function displaySuggestions(suggestions) {
+    //     if (suggestions.length === 0) {
+    //         suggestionsDiv.style.display = 'none';
+    //         return;
+    //     }
+    //     const listItems = suggestions.map(suggestion => `<li>${suggestion}</li>`).join('');
+    //     suggestionsDiv.innerHTML = `<ul>${listItems}</ul>`;
+    //     suggestionsDiv.style.display = 'block';
+
+    //     // Adding click event listeners to suggestions
+    //     const suggestionItems = suggestionsDiv.querySelectorAll('li');
+    //     suggestionItems.forEach(item => {
+    //         item.addEventListener('click', function() {
+    //             const cursorPosition = textarea.selectionStart;
+    //             const words = textarea.value.substring(0, cursorPosition).split(/\s+/);
+    //             words[words.length - 1] = this.innerText;
+    //             textarea.value = words.join(' ') + textarea.value.substring(cursorPosition);
+    //             suggestionsDiv.style.display = 'none';
+    //         });
+    //     });
+    // }
+
+    // // Hide suggestions when clicking outside the textarea
+    // document.addEventListener('click', function(event) {
+    //     if (event.target !== textarea && event.target !== suggestionsDiv) {
+    //         suggestionsDiv.style.display = 'none';
+    //     }
+    // });
+
 </script>
 </html>

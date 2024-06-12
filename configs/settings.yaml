@@ -5,10 +5,10 @@ sqlserver_connection2:
   name: sqlserver_connection2
   user: jeevan.v
   password: experion@123
-  servername: JEEVANV\SQLEXPRESS
+  server: JEEVANV\SQLEXPRESS
   localhost: None
   database: AdventureWorksLT2022
-  table: SalesLT.Product
+  schema: SalesLT
 
 csv_connection:
   source: csv

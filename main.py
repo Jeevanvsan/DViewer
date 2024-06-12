@@ -2,9 +2,12 @@ import yaml
 import os
 import multiprocessing
 from pyspark.sql import SparkSession
+from utils import json_path
 import csv
 import pandas as pd
 from pyspark.sql.functions import col, trim
+from sqlfluff.core.parser import Lexer, Parser
+from sqlfluff.core import FluffConfig
 
 
 
@@ -32,44 +35,92 @@ class main:
                     sources_list[sources['name']] = self.files
 
                 elif sources['source'] in ['sqlserver','snowflake'] :
-                    sources['servername'] = sources['servername'].replace('\\', '\\\\')
+
+                    server = sources['server']
+                    database = sources['database']
+                    username = sources['user']
+                    password = sources['password']
+                    schema = sources['schema']
                     self.source_data = {"settings": settings}
+
+                    jdbc_url = f"jdbc:sqlserver://{server};databaseName={database}"
+
+                    print("on sql settings")
+
+
+                    # Define the query to fetch table names
+                    query = f"(SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA = '{schema}') AS table_list"
+                    properties = {
+                                    "encrypt":"true",
+                                    "user": username,
+                                    "password": password,
+                                    "trustServerCertificate":"true",
+                                    "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+                                }
+                    data = self.spark.read.jdbc(url=jdbc_url, table=query, properties=properties)
+
+                    print("on sql settings reading done")
+
+
+                    table_names = [row.TABLE_NAME for row in data.collect()]
+
+                    # print(table_names)
+
+                    sources['server'] = sources['server'].replace('\\', '\\\\')
+
+
+
 
                     if 'table' in sources: 
                         self.files.append(sources['table'])
+                    else:
+                        self.files = table_names
                     sources_list[sources['name']] = self.files
                     
             self.source_data["sources_list"] = sources_list
         return self.source_data
     
 
-    def read_data(self,connection_name,name,source):
+    def read_data(self,connection_name,name,source,flag = True):
+      
         
 
         if ('csv' in source):
+            if not flag:
+                name = f"{name}.{source}"
+
             data = self.spark.read.format("csv").load(f"inputs/{name}",header=True)
             data.toPandas().to_parquet(f'fi/{name}.parquet',index=False)
-            data = data.toPandas()
+            if flag:
+                data = data.toPandas()
             return data
         
         if ('parquet' in source):
+            if not flag:
+                name = f"{name}.{source}"
+
             data = self.spark.read.format("parquet").load(f"inputs/{name}",header=True)
             data.toPandas().to_parquet(f'fi/{name}.parquet',index=False)
-            data = data.toPandas()
+            
+            if flag:
+                data = data.toPandas()
             return data
         
         if('sqlserver' in source):
             
             with open('configs/settings.yaml') as setting_file:
                 settings = yaml.safe_load(setting_file.read())
+
             
             connections = settings[connection_name]
+            schema = connections['schema']
+
             user = connections['user']
             password = connections['password']
-            table = name
-            servername = connections["servername"]
+            table = f"{schema}.{name}"
+            server = connections["server"]
             database = connections["database"]
-            jdbc_url = f"jdbc:sqlserver://{servername};databaseName={database}"
+            jdbc_url = f"jdbc:sqlserver://{server};databaseName={database}"
             query = f"(SELECT * FROM {table}) AS alias"
 
 
@@ -82,28 +133,11 @@ class main:
             }
             data = self.spark.read.jdbc(url=jdbc_url, table=query, properties=properties)
             data.toPandas().to_parquet(f'fi/{name}.parquet',index=False)
-
-            data = data.toPandas()
+            if flag:
+                data = data.toPandas()
             return data
 
         
-            
-        # p1 = multiprocessing.Process(target=self.data_reading_process,args=(connection_name,name, )) 
-
-        # # starting processes 
-        # p1.start() 
-
-        # # process IDs 
-        # print("ID of process p1: {}".format(p1.pid)) 
-
-        # # wait until processes are finished 
-        # p1.join()
-
-    # def data_reading_process(self,connection_name,name):
-    #     spark = SparkSession.builder.appName("DViewer").getOrCreate()
-    #     print("reading started")
-    #     data = spark.read.format("csv").load(f"inputs/{name}",header=True)
-    #     data.show()
 
     def apply_filters(self,filters,fid,name):
 
@@ -153,16 +187,47 @@ class main:
 
     def endsWith_filter(self,df,logic1_val,column_name):
         return df.filter(trim(col(column_name)).like(f"%{str(logic1_val).strip()}"))
+    
 
-            
-# worksheet for
-        # df.createOrReplaceTempView("my_table")
-        # Query to filter out rows where 'column1' is not equal to 1
-        # filtered_df = self.spark.sql(f"SELECT * FROM my_table WHERE {column_name} != {logic1_val}")
-        # filtered_df = self.spark.sql(f"SELECT * FROM my_table WHERE ID != 2")
-        # filtered_df.show()
-        # print("hi")
-        # return filtered_df
+    def query_sheet(self,data):
+
+        global df 
+        # global filtered_df 
+
+        try:
+
+            with open('configs/settings.yaml') as setting_file:
+                settings = yaml.safe_load(setting_file)
+
+            query = str(data['query'])
+            connection = data['connection']
+            table = data['table']
+
+            print(query)
+
+
+            source = settings[connection]['source']
+
+            if table in os.listdir('fi'):
+                if source in ['csv','xls','parquet']:
+                    table = f"{table}.{source}"
+                df = self.spark.read.format("parquet").load(f"fi/{table}.parquet")
+                # df.show()
+            else:
+                df = self.read_data(connection,table,source,False)
+
+            # df.show()
+
+            df.createOrReplaceTempView(str(table))
+            filtered_df = self.spark.sql(query)
+            return filtered_df.toPandas()
+
+            # filtered_df.show()
+        except Exception as e:
+            return {'error':  str(e)}
+
+
+
 
 
 if __name__ == '__main__':

@@ -135,6 +135,19 @@ def column_filter(cols):
     return jsonify({'html': data})
 
 
+@app.route('/run_query',methods=["GET", "POST"])
+def run_query():
+    global rtn_data
+    if request.method == "POST":
+        jsonData = request.get_json()
+        df = main_ob.query_sheet(jsonData)
+        if not isinstance(df,dict):
+            rtn_data = df.to_html(classes='table',table_id="data_tbl_query", index=False)
+        else:
+            rtn_data = df['error']
+        return jsonify({'html': rtn_data})
+
+
 if __name__ == '__main__':
 
     PORT = 8082
