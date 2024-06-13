@@ -1,0 +1,30 @@
+
+
+sqlserver_connection:
+  source: sqlserver
+  name: sqlserver_connection
+  user: jeevan.v
+  password: experion@123
+  server: JEEVANV\SQLEXPRESS
+  localhost: None
+  database: AdventureWorksLT2022
+  schema: SalesLT
+
+csv_connection:
+  source: csv
+  name: csv_connection
+
+parquet_connection:
+  source: parquet
+  name: parquet_connection
+
+snowflake_connection:
+  source: snowflake
+  name: snowflake_connection
+  account : xgyqoxj-lv93084
+  user: jeevan1
+  password : Jeevan@1661
+  database: TEST_DBT
+  schema: DBT_SCHEMA
+  warehouse: COMPUTE_WH
+  role: ACCOUNTADMIN

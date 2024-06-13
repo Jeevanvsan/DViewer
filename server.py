@@ -8,7 +8,6 @@ import webbrowser
 import urllib.parse
 from flask_socketio import SocketIO, emit
 import json
-from main import main
 import pandas as pd
 import shutil
 
@@ -21,8 +20,7 @@ app._static_folder = "static"
 app.jinja_env.variable_start_string = '[['
 app.jinja_env.variable_end_string = ']]'
 
-socketio = SocketIO(app,async_mode='eventlet')
-main_ob = main()
+socketio = SocketIO(app)
 
 
 table_cache = {}
@@ -30,9 +28,15 @@ table_cache = {}
 filters = {}
 selected_cols = {}
 
+
+
     
 @app.route('/')
 def index():
+      return render_template('index.html') 
+
+@app.route('/main')
+def main_():
     global table_cache, filters, selected_cols
     table_cache = {}
     filters = {}
@@ -41,15 +45,18 @@ def index():
     if os.path.exists('fi'):
         shutil.rmtree('fi')
         os.mkdir('fi')
-    
-   
 
+    from main import main
+    main_ob = main()
+
+    
     settings = main_ob.get_source_data()
-    return render_template('index.html',settings=settings) 
+    return jsonify(settings=settings)
 
 @app.route('/get_data/<connection_name>/<name>/<source>')
 def get_data(connection_name, name,source):
-    
+    from main import main
+    main_ob = main()
         
     data = ''
     table_cache['name'] = name
@@ -65,7 +72,7 @@ def get_data(connection_name, name,source):
         selected_cols[fid] = {}
 
 
-    if f'{connection_name}_{name}_{source}' in table_cache:
+    if fid in table_cache:
         data = table_cache[f'{fid}']
 
     else:
@@ -79,6 +86,8 @@ def get_data(connection_name, name,source):
 
 @app.route('/filter/<logic1_op>/<logic1_val>/<column_name>/<id>')
 def filter(logic1_op, logic1_val,column_name,id):
+    from main import main
+    main_ob = main()
     name = table_cache['name'] 
     connection_name = table_cache['connection_name'] 
     source = table_cache['source'] 
@@ -96,6 +105,8 @@ def filter(logic1_op, logic1_val,column_name,id):
 
 @app.route('/filter_remove/<id>')
 def filter_remove(id):
+    from main import main
+    main_ob = main()
     name = table_cache['name'] 
     connection_name = table_cache['connection_name'] 
     source = table_cache['source'] 
@@ -137,9 +148,12 @@ def column_filter(cols):
 
 @app.route('/run_query',methods=["GET", "POST"])
 def run_query():
+    from main import main
+    main_ob = main()
     global rtn_data
     if request.method == "POST":
         jsonData = request.get_json()
+        # print(js)
         df = main_ob.query_sheet(jsonData)
         if not isinstance(df,dict):
             rtn_data = df.to_html(classes='table',table_id="data_tbl_query", index=False)

@@ -1,7 +1,5 @@
 
 
-
-
 csv_connection:
   source: csv
   name: csv_connection
@@ -9,3 +7,18 @@ csv_connection:
 parquet_connection:
   source: parquet
   name: parquet_connection
+
+xlsx_connection:
+  source: xlsx
+  name: xlsx_connection
+
+sqlserver_connection:
+  source: sqlserver
+  name: sqlserver_connection
+  user: jeevan.v
+  password: experion@123
+  server: JEEVANV\SQLEXPRESS
+  localhost: None
+  database: AdventureWorksLT2022
+  schema: SalesLT
+
