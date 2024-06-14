@@ -61,6 +61,20 @@ class main:
             fn(value,settings)
             q.task_done()
 
+    
+    def get_column_data(self,file,source):
+        if source in ["csv", "parquet"]:
+            data = self.spark.read.format(source).load(f"inputs/{file}",header=True)
+            struct = [
+                    {"name": field.name,
+                    "dataType": field.dataType.simpleString()
+                    }
+                    for field in data.schema.fields
+                ]
+            
+            return struct
+
+            
 
     
     def source_read(self,sources,settings):
@@ -70,8 +84,11 @@ class main:
 
             for file in os.listdir('inputs'):
                 if sources['source'] in file:
-                    self.files.append(file)
-            
+                    file_data = {}
+                    file_data["name"] = file
+                    file_data["columns"] =  self.get_column_data(file,sources['source'])
+
+                    self.files.append(file_data)
             
             self.sources_list[sources['name']] = self.files
 
@@ -86,9 +103,6 @@ class main:
 
             jdbc_url = f"jdbc:sqlserver://{server};databaseName={database}"
 
-            #print("on sql settings")
-
-
             # Define the query to fetch table names
             query = f"(SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA = '{schema}') AS table_list"
             properties = {
@@ -100,14 +114,48 @@ class main:
                         }
             data = self.spark.read.jdbc(url=jdbc_url, table=query, properties=properties)
 
-            #print("on sql settings reading done")
+
+            
 
 
-            table_names = [row.TABLE_NAME for row in data.collect()]
+            ##print("on sql settings reading done")
+
+            source_data = {}
+
+
+            # table_names = [row.TABLE_NAME for row in data.collect()]
+            table_names = []
+
+            for row in data.collect():
+                table_data = {}
+                table_data['name'] = row.TABLE_NAME
+
+                query1 = f"(SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '{schema}' AND table_name = '{row.TABLE_NAME}') AS table_list"
+
+                column_data = self.spark.read.jdbc(url=jdbc_url, table=query1, properties=properties)
+
+                # Collect the data from the DataFrame
+                column_data_collected = column_data.collect()
+
+                # Transform the collected data into a list of dictionaries
+                table_data['columns'] = [{"column_name": row["column_name"], "data_type": row["data_type"]} for row in column_data_collected]
+
+                table_names.append(table_data)
 
 
 
-            # #print(table_names)
+            # for tbls in table_names:
+            #     source_data[''] = 
+
+            #     query1 = f"(SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '{schema}' AND table_name = '{tbls}';) AS table_list"
+
+            #     column_data = self.spark.read.jdbc(url=jdbc_url, table=query1, properties=properties)
+
+
+
+
+
+            # ##print(table_names)
 
             sources['server'] = sources['server'].replace('\\', '\\\\')
 
@@ -131,7 +179,7 @@ class main:
             warehouse= sources['warehouse']
             role= sources['role']
 
-            #print("on snowflake settings")
+            ##print("on snowflake settings")
 
 
             conn = snowflake.connector.connect(
@@ -172,27 +220,62 @@ class main:
                 name = f"{name}.{source}"
 
             data = self.spark.read.format("csv").load(f"inputs/{name}",header=True)
+            data = data.na.fill('Null')
             if not os.path.exists(f'fi/{connection_name}'):
                 os.mkdir(f'fi/{connection_name}')
 
             data.toPandas().to_parquet(f'fi/{connection_name}/{name}.parquet',index=False)
+
+            struct = {
+                    field.name: {
+                        "dataType": field.dataType.simpleString(),
+                        "nullable": field.nullable,
+                    }
+                    for field in data.schema.fields
+                }
+
+            struct = pd.DataFrame.from_dict(struct, orient='index')
+            struct.reset_index(inplace=True)
+            struct.rename(columns={'index': 'column_name'}, inplace=True)
+
             if flag:
+                
                 data = data.toPandas()
-            return data
+
+
+            return {"data": data,"struct":struct}
         
         if ('parquet' in source):
             if not flag:
                 name = f"{name}.{source}"
 
             data = self.spark.read.format("parquet").load(f"inputs/{name}",header=True)
+            data = data.na.fill('Null')
+
             if not os.path.exists(f'fi/{connection_name}'):
                 os.mkdir(f'fi/{connection_name}')
 
             data.toPandas().to_parquet(f'fi/{connection_name}/{name}.parquet',index=False)
+
+            struct = {
+                    field.name: {
+                        "dataType": field.dataType.simpleString(),
+                        "nullable": field.nullable,
+                    }
+                    for field in data.schema.fields
+                }
+
+            struct = pd.DataFrame.from_dict(struct, orient='index')
+            struct.reset_index(inplace=True)
+            struct.rename(columns={'index': 'column_name'}, inplace=True)
             
             if flag:
+                
+
                 data = data.toPandas()
-            return data
+
+
+            return {"data": data,"struct":struct}
         
         if ('xlsx' in source):
             if not flag:
@@ -200,17 +283,36 @@ class main:
 
             df_pandas = pd.read_excel(f"inputs/{name}")  
 
+
             data = self.spark.createDataFrame(df_pandas)
+            data = data.na.fill('Null')
+
 
             if not os.path.exists(f'fi/{connection_name}'):
                 os.mkdir(f'fi/{connection_name}')
 
-            df_pandas.to_parquet(f'fi/{connection_name}/{name}.parquet',index=False)
+            data.toPandas().to_parquet(f'fi/{connection_name}/{name}.parquet',index=False)
+
+            struct = {
+                    field.name: {
+                        "dataType": field.dataType.simpleString(),
+                        "nullable": field.nullable,
+                    }
+                    for field in data.schema.fields
+                }
+
+            struct = pd.DataFrame.from_dict(struct, orient='index')
+            struct.reset_index(inplace=True)
+            struct.rename(columns={'index': 'column_name'}, inplace=True)
             
             if flag:
+
+                
+
                 data = data.toPandas()
 
-            return data
+
+            return {"data": data,"struct":struct}
         
         if('sqlserver' in source):
             
@@ -227,6 +329,9 @@ class main:
             server = connections["server"]
             database = connections["database"]
             jdbc_url = f"jdbc:sqlserver://{server};databaseName={database}"
+
+
+
             query = f"(SELECT * FROM {table}) AS alias"
 
 
@@ -238,19 +343,28 @@ class main:
                 "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
             }
             data = self.spark.read.jdbc(url=jdbc_url, table=query, properties=properties)
+            data = data.na.fill('Null')
+
+            query1 = f"(SELECT * FROM information_schema.columns WHERE table_schema = '{schema}' AND table_name = '{name}') AS alias"
+            struct = self.spark.read.jdbc(url=jdbc_url, table=query1, properties=properties)
+            struct = struct.toPandas()
+
+
             if not os.path.exists(f'fi/{connection_name}'):
                             os.mkdir(f'fi/{connection_name}')
 
             data.toPandas().to_parquet(f'fi/{connection_name}/{name}.parquet',index=False)            
             if flag:
                 data = data.toPandas()
-            return data
+                
+
+            return {"data": data,"struct":struct}
         
         if('snowflake' in source):
             with open('configs/settings.yaml') as setting_file:
                 settings = yaml.safe_load(setting_file.read())
 
-            #print('reading .....')
+            ##print('reading .....')
             connections = settings[connection_name]
             account = connections['account']
             user= connections['user']
@@ -269,6 +383,8 @@ class main:
                 database = database
             )
 
+
+
             # SQL query
             sql_query = f"SELECT * FROM {database}.{schema}.{name}"
 
@@ -279,25 +395,42 @@ class main:
             # Fetch all results into a list of tuples
             results = cursor.fetchall()
 
+            sql_query = f"SELECT * FROM INFORMATION_SCHEMA.columns WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}'"
+
+            # Execute the query
+            cursor = conn.cursor(DictCursor)
+            cursor.execute(sql_query)
+
+            struct = cursor.fetchall()
+
+
             # Close Snowflake connection
             conn.close()
 
             # Create a Spark DataFrame from the fetched results
             data = self.spark.createDataFrame(results)
+            data = data.na.fill('Null')
+
+            query1 = f"(SELECT * FROM information_schema.columns WHERE table_schema = '{schema}' AND table_name = '{name}') AS alias"
+            struct = self.spark.read.jdbc(url=jdbc_url, table=query1, properties=properties)
+            struct = struct.toPandas()
+
             if not os.path.exists(f'fi/{connection_name}'):
                 os.mkdir(f'fi/{connection_name}')
 
             data.toPandas().to_parquet(f'fi/{connection_name}/{name}.parquet',index=False)
             if flag:
                 data = data.toPandas()
-            return data
+                
+
+            return {"data": data,"struct":struct}
         
 
         
 
-    def apply_filters(self,filters,fid,name):
+    def apply_filters(self,filters,fid,name,connection_name):
 
-        filtered_df = self.spark.read.format("parquet").load(f"fi/{name}.parquet")
+        filtered_df = self.spark.read.format("parquet").load(f"fi/{connection_name}/{name}.parquet")
 
         for id,filter in filters[fid].items():
             #print(filter)
@@ -320,7 +453,13 @@ class main:
             
             if ('ends with' == filter['logic1_op']):
                 filtered_df = self.endsWith_filter(filtered_df,filter['logic1_val'],filter['column_name'])
-        # #print(filtered_df.show())
+
+            if ('null' == filter['logic1_op']):
+                filtered_df = self.null_filter(filtered_df,filter['column_name'])
+
+            if ('not null' == filter['logic1_op']):
+                filtered_df = self.not_null_filter(filtered_df,filter['column_name'])
+        # ##print(filtered_df.show())
         filtered_df = filtered_df.toPandas()
 
         return filtered_df
@@ -344,6 +483,12 @@ class main:
     def endsWith_filter(self,df,logic1_val,column_name):
         return df.filter(trim(col(column_name)).like(f"%{str(logic1_val).strip()}"))
     
+    def null_filter(self,df,column_name):
+        return df.filter(trim(trim(col(column_name))) == str('Null').strip())
+    
+    def not_null_filter(self,df,column_name):
+        return df.filter(trim(trim(col(column_name))) != str('Null').strip())
+    
 
     def query_sheet(self,data):
 
@@ -359,7 +504,7 @@ class main:
             connection = data['connection']
             table = data['table']
 
-            # #print(connection)
+            # ##print(connection)
 
 
             source = settings[connection]['source']
@@ -368,14 +513,16 @@ class main:
                 if table in os.listdir(f"fi/{connection}"):
                     if source in ['csv','xls','parquet']:
                         table = f"{table}.{source}"
-                    df = self.spark.read.format("parquet").load(f"fi/{table}.parquet")
+                    df = self.spark.read.format("parquet").load(f"fi/{connection}/{table}.parquet")
                 else:
                     df = self.read_data(connection,table,source,False)
+                    df = df['data']
 
 
                 # df.show()
             else:
                 df = self.read_data(connection,table,source,False)
+                df = df['data']
 
             # df.show()
 
@@ -405,11 +552,11 @@ class main:
 
         dql_keywords = ['SELECT', 'DESCRIBE', 'SHOW', 'EXPLAIN', 'WITH_COMPOUND']
 
-        # #print(parsed)
+        # ##print(parsed)
 
         stmts = json_path.rtn_get_json_keypaths(parsed,'file.batch.statement', top_level=True)[0]
         for key, value in stmts.items():
-            #print(key)
+            ##print(key)
             if str(key.replace('_statement','')).upper() in dql_keywords:
                 return True
             else:

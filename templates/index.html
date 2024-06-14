@@ -235,9 +235,25 @@
             box-shadow: 0 0 8px 3px #D3D3D3;
           }
 
+          #struct_searchInput {
+            height:1vh;
+            background-position: 10px 12px; /* Position the search icon */
+            background-repeat: no-repeat; /* Do not repeat the icon image */
+            width: 30%; 
+            font-size: 16px; /* Increase font-size */
+            padding: 12px 20px 12px 40px; /* Add some padding */
+            border: 2px solid #D3D3D3; 
+            margin-bottom: 12px; /* Add some space below the input */
+            border-radius:10px;
+            box-shadow: 0 0 8px 3px #D3D3D3;
+          }
+
           #source_name a{
-            font-size: 13px;
             cursor: pointer;
+          }
+          #source_name{
+            overflow: auto;
+            height: 93vh;
           }
           #source_name h2{
             font-size: 15px;
@@ -252,12 +268,6 @@
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
             animation: float 5s infinite
           }
-          #table_cont{
-            height: 55vh;
-            width: 100%;
-            margin: 0;
-            overflow: auto;
-          }
           #data_tbl td:hover{
             border: solid 2px rgba(0, 183, 255, 0.83);
           }
@@ -270,6 +280,83 @@
 
           }
           #data_tbl td{
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          #data_tbl td:hover{
+            border: solid 2px rgba(0, 183, 255, 0.83);
+          }
+          #data_tbl th{
+            position: sticky;
+            top: 0;
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+
+          }
+          #data_tbl td{
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          #table_cont{
+            height: 55vh;
+            width: 100%;
+            margin: 0;
+            overflow: auto;
+          }
+
+          #struct_table_cont{
+            height: 55vh;
+            width: 100%;
+            margin: 0;
+            overflow: auto;
+          }
+
+          #struct_data_tbl{
+            font-size: 12px;
+            width: 100%;
+            user-select: none;
+            background: white;
+            border-radius:3px;
+            border-collapse: collapse;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            animation: float 5s infinite
+          }
+          #struct_data_tbl td:hover{
+            border: solid 2px rgba(0, 183, 255, 0.83);
+          }
+          #struct_data_tbl th{
+            position: sticky;
+            top: 0;
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+
+          }
+          #struct_data_tbl td{
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          #struct_data_tbl td:hover{
+            border: solid 2px rgba(0, 183, 255, 0.83);
+          }
+          #struct_data_tbl th{
+            position: sticky;
+            top: 0;
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+
+          }
+          #struct_data_tbl td{
             padding: 10px;
             white-space: nowrap;
             overflow: hidden;
@@ -368,6 +455,10 @@
         }
 
         .minimized .div-content_join {
+            display: none;
+        }
+
+        .minimized .cols_div {
             display: none;
         }
 
@@ -652,6 +743,53 @@
             width: 90%;
             border-radius: 3px;
         }
+        #tbl_ul p{
+            font-size: 18px;
+            background-color: #c2c2c2;
+            padding: 4px 10px;
+        }
+
+        .main-heading, .element-heading {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+        }
+
+
+        .column-name {
+        /* margin-left: 20px; */
+        list-style: none;
+        font-size: 14px;
+
+        display: none; /* Initially hide columns */
+        background-color: #8080803a;
+        border-radius: 10px;
+        padding: 5PX;
+        }
+
+        .icon {
+        cursor: pointer;
+        font-size: 24px;
+        margin-right: 10px;
+        }
+
+        /* Nested arrangement */
+        .main-heading {
+            font-weight: bold;
+        }
+
+        .element-heading {
+        font-weight: normal;
+        font-size: 16px;
+        margin-left: 20px; /* Adjust the indentation */
+        }
+        #column_name_li{
+            border-bottom: #00000044 solid 1px; 
+            padding: 4px;
+
+        }
+
+     
        
     </style>
 </head>
@@ -728,8 +866,8 @@
                                                        
                         </div>
                         <div class="panel" id="three-panel">
-                            <input type="text" id="searchInput" onkeyup="myFunction()" placeholder="Search ...">
-                            <div id="table_cont">
+                            <input type="text" id="struct_searchInput"  placeholder="Search ...">
+                            <div id="struct_table_cont">
                                 <table>
 
                                 </table>
@@ -811,34 +949,7 @@
 
     
 
-    var socket = io.connect('http://127.0.0.1:8082');
-
     
-    document.addEventListener("DOMContentLoaded", function() {
-        
-        socket.on('connect', function(rs) {
-            console.log('Connected to server');
-
-        });
-
-        socket.on('disconnect', function(reason) {
-            console.log('Disconnected from server: ' + reason);
-        });
-
-        socket.on('connect_error', function(error) {
-            console.error('Connection Error:', error);
-        });
-
-        socket.on('reconnect', function(attemptNumber) {
-            console.log('Reconnected to server after ' + attemptNumber + ' attempts');
-        });
-        
-        socket.on('emit_val', function(data) {
-            console.log(data);
-            document.getElementById("loader").querySelector("p").innerHTML += data;  
-        }); 
-
-    })
 
     // console.log(socket)
 
@@ -855,6 +966,7 @@
         document.getElementById("query_right").style.display="flex";
     });
 
+ 
     
 
     
@@ -933,6 +1045,7 @@
                     CodeMirror.showHint(editor, customHint, {completeSingle: false});
                     });
 
+                    console.log(qry_tbls)
                     function checkWord(word) {
                         if (qry_tbls.includes(word)) {
                             console.log(word);
@@ -952,8 +1065,9 @@
                     });
 
                     function checkWords() {
+                        console.log(qry_tbls);
                         var text = editor.getValue();
-                        var words = text.split(/\s+/);
+                        var words = text.split(/\s+|[,.;]+/);                        
                         words.forEach(function(word) {
                         if (qry_tbls.includes(word)) {
                             document.getElementById('table_select').value = word;
@@ -983,11 +1097,12 @@
     function on_settings_got(settings){
         if (settings){
         get_settings(settings);
+        
             
         wrksheet_con_select = document.getElementById('connections_select');
         wrksheet_tbl_select = document.getElementById('table_select');
 
-        console.log(settings);
+        // console.log(settings);
         for (key in settings['sources_list']) {
             option = document.createElement("option");
             option.text = key;
@@ -998,12 +1113,13 @@
 
 
         qry_tbls = settings['sources_list'][wrksheet_con_select.value];
-        qry_tbls = qry_tbls.map(filename => filename.replace(`.${source}`, ""));
+        qry_tbls = qry_tbls.map(filename => filename.name.replace(`.${source}`, ""));
+        console.log(qry_tbls);
 
 
 
         settings['sources_list'][wrksheet_con_select.value].forEach((tbls)=>{
-            tbls = tbls.replace(`.${source}`,'');
+            tbls = tbls.name.replace(`.${source}`,'');
             option = document.createElement("option");
             option.text = tbls;
             option.value = tbls;
@@ -1011,40 +1127,100 @@
         });
         
 
-        console.log(wrksheet_con_select.value);
+        // console.log(wrksheet_con_select.value);
     }
     }
     
     function addConnection(){
     alert('Connection');
     }
+    function toggleList(icon, element) {
+    if (element.style.display === 'none') {
+      element.style.display = 'block';
+      icon.textContent = '-';
+    } else {
+      element.style.display = 'none';
+      icon.textContent = '+';
+    }
+  }
 
     function get_settings(settings){
-        var source_ul = document.getElementById('source_name');
+        var container = document.getElementById('source_name');
         console.log(settings)
-        for (key in settings['sources_list']){
+
+        data = settings['sources_list']
+
+        Object.keys(data).forEach(key => {
+            const mainHeading = document.createElement('div');
+            mainHeading.classList.add('main-heading');
             connection_name = key
-            console.log(connection_name)
+            mainHeading.textContent = key;
             source = settings['settings'][connection_name]['source'];
-            source_list = settings['sources_list'][key]
-            source_ul.innerHTML += `<h2>${key}</h2>`
-            source_list.forEach(element => {
-                source_ul.innerHTML += `<li><a onclick="get_data('${connection_name}','${element}','${source}')"><p>${element.replace(`.${source}`,'')}</p></a></li>` 
+
+
+            const mainIcon = document.createElement('span');
+            mainIcon.classList.add('icon', 'icon-plus');
+            mainIcon.textContent = '+';
+            mainIcon.addEventListener('click', () => {
+                toggleList(mainIcon, mainHeading.nextElementSibling);
             });
 
-        }
+            mainHeading.prepend(mainIcon);
+            
+            const elementsContainer = document.createElement('div');
+            elementsContainer.style.display = 'none';
+
+            data[key].forEach(element => {
+                name = element.name
+                const elementHeading = document.createElement('div');
+                elementHeading.classList.add('element-heading');
+                elementHeading.innerHTML = `<a onclick="get_data('${connection_name}','${name}','${source}')">${name.replace(`.${source}`, '')}</a>`;
+                console.log(element.name)
+
+
+
+                const elementIcon = document.createElement('span');
+                elementIcon.classList.add('icon', 'icon-plus');
+                elementIcon.textContent = '+';
+                elementIcon.addEventListener('click', () => {
+                    toggleList(elementIcon, elementHeading.nextElementSibling);
+                });
+
+                elementHeading.prepend(elementIcon);
+
+                const columnsList = document.createElement('ul');
+                columnsList.classList.add('column-name');
+                element.columns.forEach(column => {
+                const columnItem = document.createElement('li');
+                columnItem.id = "column_name_li";
+                columnItem.textContent = `${column.name} (${column.dataType})`;
+                columnsList.appendChild(columnItem);
+                });
+
+                elementsContainer.appendChild(elementHeading);
+                elementsContainer.appendChild(columnsList);
+            });
+
+            container.appendChild(mainHeading);
+            container.appendChild(elementsContainer);
+            });
+
         document.getElementById('loader').style.display = 'none';
         
-        // document.getElementById("query_sheet").style.display = 'block';
 
+    }
 
-        // document.getElementsByClassName("CodeMirror").style.display = 'block';
-
+    function toggle_fn(e){
+        console.log(e.target);
+    // e.target.querySelector('div').classList.toggle('minimized');
+  
     }
 
     function get_data(connection_name,name,source) {
 
         document.getElementById('two').checked = true;
+        document.getElementById("data_right").style.display="flex";
+        document.getElementById("query_right").style.display="none";
 
 
         document.getElementById('tbl_name').innerHTML = 'Loading...';
@@ -1068,6 +1244,9 @@
             document.getElementById('tbl_name').innerHTML = `${name}`;
             document.getElementById('loading_p').innerHTML = 'selected top 100';
             document.getElementById('table_cont').innerHTML = data['html']
+            document.getElementById('struct_table_cont').innerHTML = data['struct']
+
+            // console.log(data['struct']);
 
             document.getElementById('hidden_con').innerHTML = connection_name
             document.getElementById('hidden_source').innerHTML = source
@@ -1082,7 +1261,7 @@
                     filterDiv(id,data['filters'][id],true);
                 }
             }
-            console.log(data);
+            // console.log(data);
             const table = document.getElementById('data_tbl');
             const rows = table.querySelectorAll('tr');
 
@@ -1115,7 +1294,7 @@
                 });
                 }
             }else{
-                console.log("11");
+                // console.log("11");
                 generateColumnSelector(table);
             }
 
@@ -1290,7 +1469,7 @@
     function generateColumnSelector(table, columns,ex_filter = false) {
         // const table = document.getElementById('data_tbl');
         if(!ex_filter) {
-            console.log('no ex_filter')
+            // console.log('no ex_filter')
             const headers = table.querySelectorAll('th');
             const columnCheckboxes = document.getElementById('columnCheckboxes');
 
@@ -1431,12 +1610,18 @@
         columnSelector.classList.toggle('minimized');
     }
 
+   
+
+
     document.addEventListener('DOMContentLoaded', function() {
         const tableContainer = document.getElementById('table_cont');
+        const tableContainer2 = document.getElementById('struct_table_cont');
         const container = document.getElementById('container');
         const searchInput = document.getElementById('searchInput');
+        const struct_searchInput = document.getElementById('struct_searchInput');
 
         let tableRows = [];
+        let struct_tableRows = [];
 
         // Create an observer to watch for changes in the table container
         const observer1 = new MutationObserver(function(mutations) {
@@ -1461,6 +1646,20 @@
             mutations.forEach(function(mutation) {
                 if (mutation.addedNodes.length > 0) {
                     mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeName === 'TABLE') {
+                            struct_tableRows = Array.from(node.querySelectorAll('tbody tr')); // Store all table rows
+
+                        }
+                    });
+                }
+            });
+        });
+
+        const observer3 = new MutationObserver(function(mutations) {
+            console.log(mutations);
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length > 0) {
+                    mutation.addedNodes.forEach(function(node) {
                         if (node.nodeName === 'DIV') {
                             // filterDiv(node);
                         }
@@ -1471,11 +1670,32 @@
 
         // Configure the observer to watch for child nodes being added
         observer1.observe(tableContainer, { childList: true });
-        observer2.observe(container, { childList: true });
+
+        observer2.observe(tableContainer2, { childList: true });
+
+        observer3.observe(container, { childList: true });
 
         searchInput.addEventListener('input', function() {
             const filter = searchInput.value;
             tableRows.forEach(function(row) {
+                const cells = row.querySelectorAll('td');
+                let rowVisible = false;
+                cells.forEach(function(cell) {
+                    if (cell.textContent.indexOf(filter) > -1) {
+                        rowVisible = true;
+                    }
+                });
+                if (rowVisible) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        struct_searchInput.addEventListener('input', function() {
+            const filter = struct_searchInput.value;
+            struct_tableRows.forEach(function(row) {
                 const cells = row.querySelectorAll('td');
                 let rowVisible = false;
                 cells.forEach(function(cell) {
@@ -1660,7 +1880,9 @@
             // Handle errors here
         });
 
+
     }
+
         
     function remove(element, div_id){
             // let index  = tags.indexOf(tag);
@@ -1673,6 +1895,8 @@
 
     function filtering(div,opt_val,ex_filter){
         var div_id = div.id
+
+
 
         if (ex_filter){
             div_id = div
@@ -1806,7 +2030,7 @@
                 }
 
                 
-                logic_list = ['equal','not equal','contains', 'not contains', 'starts with', 'ends with']
+                logic_list = ['equal','not equal','contains', 'not contains', 'starts with', 'ends with', 'null', 'not null']
 
                 var logic1_opt = document.createElement('select');
                 logic1_opt.id= 'logic1_opt'+div_id
@@ -1820,6 +2044,8 @@
 
                 for (var i = 0; i < logic_list.length; i++) {
                     var option = document.createElement("option");
+
+                    console.log(logic_list[i]);
                     
                     option.text = logic_list[i];
                     option.value = logic_list[i];
@@ -1852,10 +2078,30 @@
                 apply_btn.className = 'apply_btn';
                 div_cont.appendChild(apply_btn);
 
+
+                document.getElementById('logic1_opt'+div_id).addEventListener('change', (evt) => {
+                    op_va = document.getElementById('logic1_opt'+div_id).value;
+                    if (op_va == 'null' || op_va == 'not null'){
+                        document.getElementById('logic1_value'+div_id).style.display = 'none';
+
+                    }
+                    else{
+                        document.getElementById('logic1_value'+div_id).style.display = '';
+
+                    }
+
+                });
+
+
                 document.getElementById('apply_btn'+div_id).addEventListener('click', () =>{
                     var logic1_op = document.getElementById('logic1_opt'+div_id).value;
                     var logic1_val = document.getElementById('logic1_value'+div_id).value;
                     var column_name = tags[div_id]["column_name"];
+
+                    console.log(logic1_val);
+                    if (!logic1_val){
+                        logic1_val = logic1_op;
+                    }
 
                     if (column_name){
                         tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val,"column_name": column_name,"condition":"condition"}
@@ -2018,7 +2264,7 @@
                 }
 
                 
-                logic_list = ['equal','not equal','contains', 'not contains', 'starts with', 'ends with']
+                logic_list = ['equal','not equal','contains', 'not contains', 'starts with', 'ends with', 'null', 'not null']
 
                 var logic1_opt = document.createElement('select');
                 logic1_opt.id= 'logic1_opt'+div_id
@@ -2052,10 +2298,28 @@
                 apply_btn.className = 'apply_btn';
                 div.appendChild(apply_btn);
 
+                document.getElementById('logic1_opt'+div_id).addEventListener('change', (evt) => {
+                    op_va = document.getElementById('logic1_opt'+div_id).value;
+                    if (op_va == 'null' || op_va == 'not null'){
+                        document.getElementById('logic1_value'+div_id).style.display = 'none';
+
+                    }
+                    else{
+                        document.getElementById('logic1_value'+div_id).style.display = '';
+
+                    }
+
+                });
+
                 document.getElementById('apply_btn'+div_id).addEventListener('click', () =>{
                     var logic1_op = document.getElementById('logic1_opt'+div_id).value;
                     var logic1_val = document.getElementById('logic1_value'+div_id).value;
                     var column_name = tags[div_id]["column_name"];
+
+                    console.log(logic1_val);
+                    if (!logic1_val){
+                        logic1_val = logic1_op;
+                    }
 
                     if (column_name){
                         tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val,"column_name": column_name,"condition":"condition"}
@@ -2211,7 +2475,7 @@
         source = settings['settings'][wrksheet_con_select.value]['source'];
 
         qry_tbls = settings['sources_list'][wrksheet_con_select.value]
-        qry_tbls = qry_tbls.map(filename => filename.replace(`.${source}`, ""));
+        qry_tbls = qry_tbls.map(filename => filename.name.replace(`.${source}`, ""));
 
 
 

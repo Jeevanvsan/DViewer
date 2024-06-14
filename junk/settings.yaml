@@ -28,3 +28,7 @@ snowflake_connection:
   schema: DBT_SCHEMA
   warehouse: COMPUTE_WH
   role: ACCOUNTADMIN
+
+xlsx_connection:
+  source: xlsx
+  name: xlsx_connection

@@ -73,19 +73,22 @@ def get_data(connection_name, name,source):
 
 
     if fid in table_cache:
-        data = table_cache[f'{fid}']
+        data = table_cache[f'{fid}']['data']
+        struct = table_cache[f'{fid}']['struct']
 
     else:
         df = main_ob.read_data(connection_name,name,source)
-        pd.to_pickle(df, f"fi/{name}.pkl")
-        data = df.head(100).to_html(classes='table',table_id="data_tbl", index=False)
-        table_cache[f'{fid}'] = data
+        pd.to_pickle(df['data'], f"fi/{name}.pkl")
+        data = df['data'].head(100).to_html(classes='table',table_id="data_tbl", index=False)
+        struct = df['struct'].head(100).to_html(classes='table',table_id="struct_data_tbl", index=False)
+        table_cache[f'{fid}'] = {'data':data,"struct":struct}
     
-    return jsonify({'html': data,'filters': filters[fid],'selected_cols': selected_cols[fid]})
+    return jsonify({'html': data,'struct':struct,'filters': filters[fid],'selected_cols': selected_cols[fid]})
     # return jsonify({'html': data,'filters': filters[fid]})
 
 @app.route('/filter/<logic1_op>/<logic1_val>/<column_name>/<id>')
 def filter(logic1_op, logic1_val,column_name,id):
+    #print(logic1_op, logic1_val,column_name,id)
     from main import main
     main_ob = main()
     name = table_cache['name'] 
@@ -96,7 +99,7 @@ def filter(logic1_op, logic1_val,column_name,id):
     
     filters[fid][id] = {"logic1_op": logic1_op, "logic1_val": logic1_val,"column_name": column_name,"condition": "condition"}
 
-    filtered_df = main_ob.apply_filters(filters,fid,name)
+    filtered_df = main_ob.apply_filters(filters,fid,name,connection_name)
 
     data = filtered_df.head(100).to_html(classes='table',table_id="data_tbl", index=False)
     table_cache[f'{fid}'] = data
@@ -118,7 +121,7 @@ def filter_remove(id):
             filters[fid].pop(id)
     
 
-    filtered_df = main_ob.apply_filters(filters,fid,name)
+    filtered_df = main_ob.apply_filters(filters,fid,name,connection_name)
 
 
     data = filtered_df.head(100).to_html(classes='table',table_id="data_tbl", index=False)
@@ -134,12 +137,11 @@ def column_filter(cols):
     fid = f"{connection_name}_{source}_{name}"
     if request.method == "POST":
         jsonData = request.get_json()
-        print(jsonData)
         selected_cols[fid] = jsonData[fid]
 
         
     
-    # print(jsonify(cols))
+    # #print(jsonify(cols))
      
     data = 'done'
 
@@ -153,7 +155,7 @@ def run_query():
     global rtn_data
     if request.method == "POST":
         jsonData = request.get_json()
-        # print(js)
+        # #print(js)
         df = main_ob.query_sheet(jsonData)
         if not isinstance(df,dict):
             rtn_data = df.to_html(classes='table',table_id="data_tbl_query", index=False)
@@ -167,7 +169,7 @@ if __name__ == '__main__':
     PORT = 8082
     webbrowser.open_new_tab(f'http://127.0.0.1:{PORT}/')
     socketio.run(app,debug=False,port = PORT)
-    print("server started...")
+    #print("server started...")
 
 
 

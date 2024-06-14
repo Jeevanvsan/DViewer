@@ -8,9 +8,6 @@ parquet_connection:
   source: parquet
   name: parquet_connection
 
-xlsx_connection:
-  source: xlsx
-  name: xlsx_connection
 
 sqlserver_connection:
   source: sqlserver
