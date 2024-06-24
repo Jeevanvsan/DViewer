@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/thinline.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/eclipse.min.css">
@@ -750,43 +751,62 @@
         }
 
         .main-heading, .element-heading {
-        display: flex;
-        align-items: center;
-        margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
         }
 
 
         .column-name {
-        /* margin-left: 20px; */
-        list-style: none;
-        font-size: 14px;
+            list-style: none;
+            font-size: 14px;
+            display: none; 
+            margin-left: 20px;
+            padding-left: 10px; 
+            border-bottom-left-radius: 5px;
+            background-color: #8080803a;
+            border-bottom: #333 1px solid;
+            border-left: #333 1px solid;border-top: #333 1px solid;
+            border-top: #3333333f 1px solid;
+            margin-bottom: 10px;
+            color: #4f4d4d;
+            font-weight: bold;
+            width: 100%;
 
-        display: none; /* Initially hide columns */
-        background-color: #8080803a;
-        border-radius: 10px;
-        padding: 5PX;
         }
 
         .icon {
-        cursor: pointer;
-        font-size: 24px;
-        margin-right: 10px;
+            cursor: pointer;
+            color: #797979;
+            margin-right: 10px;
         }
 
-        /* Nested arrangement */
         .main-heading {
             font-weight: bold;
+            line-height: 30px;
         }
 
         .element-heading {
-        font-weight: normal;
-        font-size: 16px;
-        margin-left: 20px; /* Adjust the indentation */
+            font-weight: normal;
+            font-size: 16px;
+            margin-left: 20px; 
+            background-color: #7979792c;
+            padding: 5px 25px 5px 10px;
+            border-top-left-radius: 5px;
+            border-top: #333 1px solid;
+            border-left: #333 1px solid;
+            border-bottom: #3333333f 1px solid;
+            width: 100%;
+
         }
+
+        .element-heading :hover{
+            opacity: 70%;
+        }
+
         #column_name_li{
             border-bottom: #00000044 solid 1px; 
             padding: 4px;
-
         }
 
      
@@ -880,7 +900,7 @@
                     <div id="value_cont" class="value_cont">
                         <div class="resizer" id="resizer"></div>
                         <div id="value_cont_cont" >
-        
+                            <p id="rs_p">Result</p>
                         </div>
                     </div>
                 </div>
@@ -1092,7 +1112,7 @@
     });
     
     
-    // console.log('loded');
+    // console.log('loaded');
     
     function on_settings_got(settings){
         if (settings){
@@ -1137,10 +1157,14 @@
     function toggleList(icon, element) {
     if (element.style.display === 'none') {
       element.style.display = 'block';
-      icon.textContent = '-';
+      icon.innerHTML = '<i class="fa fa-minus" aria-hidden="true"></i>'
+
+    //   icon.textContent = '-';
     } else {
       element.style.display = 'none';
-      icon.textContent = '+';
+    //   icon.textContent = '+';
+    icon.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>'
+
     }
   }
 
@@ -1149,6 +1173,8 @@
         console.log(settings)
 
         data = settings['sources_list']
+
+        // left side bar
 
         Object.keys(data).forEach(key => {
             const mainHeading = document.createElement('div');
@@ -1160,7 +1186,16 @@
 
             const mainIcon = document.createElement('span');
             mainIcon.classList.add('icon', 'icon-plus');
-            mainIcon.textContent = '+';
+            // mainIcon.textContent = '+';
+
+            // const iconElement = document.createElement('i');
+            // iconElement.classList.add("fa-regular" ,"fa-plus");
+            // iconElement.setAttribute('aria-hidden', 'true');
+
+            // mainIcon.appendChild(iconElement);
+
+            mainIcon.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>'
+
             mainIcon.addEventListener('click', () => {
                 toggleList(mainIcon, mainHeading.nextElementSibling);
             });
@@ -1181,7 +1216,9 @@
 
                 const elementIcon = document.createElement('span');
                 elementIcon.classList.add('icon', 'icon-plus');
-                elementIcon.textContent = '+';
+                // elementIcon.textContent = '+';
+                elementIcon.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>'
+
                 elementIcon.addEventListener('click', () => {
                     toggleList(elementIcon, elementHeading.nextElementSibling);
                 });
@@ -1191,10 +1228,11 @@
                 const columnsList = document.createElement('ul');
                 columnsList.classList.add('column-name');
                 element.columns.forEach(column => {
-                const columnItem = document.createElement('li');
-                columnItem.id = "column_name_li";
-                columnItem.textContent = `${column.name} (${column.dataType})`;
-                columnsList.appendChild(columnItem);
+                    console.log(column)
+                    const columnItem = document.createElement('li');
+                    columnItem.id = "column_name_li";
+                    columnItem.textContent = `${column.name} (${column.dataType})`;
+                    columnsList.appendChild(columnItem);
                 });
 
                 elementsContainer.appendChild(elementHeading);
@@ -2435,10 +2473,16 @@
 
         wrksheet_con_select = document.getElementById('connections_select').value;
         wrksheet_tbl_select = document.getElementById('table_select').value;
+
         
-        console.log(query);
+
+        
+        document.getElementById('value_cont_cont').innerHTML = `Loading ...` 
+        
+        // console.log(query);
 
         fetch(`/run_query`,{
+        
         headers : {
         'Content-Type' : 'application/json'
         },
@@ -2475,18 +2519,23 @@
         source = settings['settings'][wrksheet_con_select.value]['source'];
 
         qry_tbls = settings['sources_list'][wrksheet_con_select.value]
+        // console.log(qry_tbls)    
         qry_tbls = qry_tbls.map(filename => filename.name.replace(`.${source}`, ""));
+        
 
 
 
         settings['sources_list'][wrksheet_con_select.value].forEach((tbls)=>{
-            tbls = tbls.replace(`.${source}`,'');
+            // console.log(tbls.name)
+            
+            tbls["name"] = tbls.name.replace(`.${source}`,'');
             option = document.createElement("option");
 
-            option.text = tbls;
-            option.value = tbls;
+            option.text = tbls["name"];
+            option.value = tbls["name"];
             wrksheet_tbl_select.appendChild(option)
         });
+        
     });
 
 

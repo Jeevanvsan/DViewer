@@ -138,7 +138,7 @@ class main:
                 column_data_collected = column_data.collect()
 
                 # Transform the collected data into a list of dictionaries
-                table_data['columns'] = [{"column_name": row["column_name"], "data_type": row["data_type"]} for row in column_data_collected]
+                table_data['columns'] = [{"name": row["column_name"], "dataType": row["data_type"]} for row in column_data_collected]
 
                 table_names.append(table_data)
 
@@ -211,6 +211,10 @@ class main:
             else:
                 self.files = table_names
             self.sources_list[sources['name']] = self.files
+
+        elif sources['source'] in 'api' :
+            pass
+            
     
 
     def read_data(self,connection_name,name,source,flag = True):

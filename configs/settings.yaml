@@ -1,14 +1,4 @@
 
-
-csv_connection:
-  source: csv
-  name: csv_connection
-
-parquet_connection:
-  source: parquet
-  name: parquet_connection
-
-
 sqlserver_connection:
   source: sqlserver
   name: sqlserver_connection
@@ -19,3 +9,6 @@ sqlserver_connection:
   database: AdventureWorksLT2022
   schema: SalesLT
 
+csv_connection:
+  source: csv
+  name: csv_connection
