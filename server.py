@@ -33,7 +33,7 @@ selected_cols = {}
     
 @app.route('/')
 def index():
-      return render_template('index.html') 
+    return render_template('index.html') 
 
 @app.route('/main')
 def main_():
@@ -79,6 +79,7 @@ def get_data(connection_name, name,source):
     else:
         df = main_ob.read_data(connection_name,name,source)
         pd.to_pickle(df['data'], f"fi/{name}.pkl")
+        df['data'].to_excel(f'fi/{connection_name}/{name}.xlsx', index=False)
         data = df['data'].head(100).to_html(classes='table',table_id="data_tbl", index=False)
         struct = df['struct'].head(100).to_html(classes='table',table_id="struct_data_tbl", index=False)
         table_cache[f'{fid}'] = {'data':data,"struct":struct}
@@ -142,7 +143,7 @@ def column_filter(cols):
         
     
     # #print(jsonify(cols))
-     
+
     data = 'done'
 
     return jsonify({'html': data})
@@ -158,11 +159,15 @@ def run_query():
         # #print(js)
         df = main_ob.query_sheet(jsonData)
         if not isinstance(df,dict):
+            df.to_excel(f'fi/DViewer.xlsx', index=False)
             rtn_data = df.to_html(classes='table',table_id="data_tbl_query", index=False)
         else:
             rtn_data = df['error']
         return jsonify({'html': rtn_data})
 
+@app.route('/xl_download')
+def xl_download():
+    return send_file('fi/DViewer.xlsx', as_attachment=True)
 
 if __name__ == '__main__':
 
@@ -171,8 +176,3 @@ if __name__ == '__main__':
     socketio.run(app,debug=False,port = PORT)
     #print("server started...")
 
-
-
-
-
-   

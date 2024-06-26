@@ -809,8 +809,10 @@
             padding: 4px;
         }
 
-     
-       
+        #settings_div li{
+            font-size: 18px;
+            padding: 5px 10px;
+        }
     </style>
 </head>
 <body>
@@ -866,7 +868,7 @@
                             </div>
                             
                             
-                           
+
                         </div>
 
                         <div class="panel" id="two-panel">
@@ -883,7 +885,7 @@
 
                                 </table>
                             </div>
-                                                       
+                                                    
                         </div>
                         <div class="panel" id="three-panel">
                             <input type="text" id="struct_searchInput"  placeholder="Search ...">
@@ -894,7 +896,9 @@
                             </div>
                         </div>
                         <div class="panel" id="four-panel">
-                            <p>Settings</p>
+                            <div id="settings_div">
+
+                            </div>
                         </div>
                     </div>
                     <div id="value_cont" class="value_cont">
@@ -966,12 +970,15 @@
     selected_cols = {};
     qry_tbls = [];
     settings = {};
+    joins = {};
+    cur_conn = '';
+    cur_tbl = '';
 
     
 
     
 
-    // console.log(socket)
+    // // console.log(socket)
 
 
     // let editor
@@ -999,7 +1006,7 @@
             .then(data => {
 
                 settings = data["settings"]
-                // console.log("data loaded");
+                // // console.log("data loaded");
                 on_settings_got(data["settings"])
 
                 document.getElementById('resizer').style.display = 'block';
@@ -1065,13 +1072,13 @@
                     CodeMirror.showHint(editor, customHint, {completeSingle: false});
                     });
 
-                    console.log(qry_tbls)
+                    // console.log(qry_tbls)
                     function checkWord(word) {
                         if (qry_tbls.includes(word)) {
-                            console.log(word);
+                            // console.log(word);
 
                             document.getElementById('table_select').value = word;
-                            console.log(word + " found in the list!");
+                            // console.log(word + " found in the list!");
                         }
                     }
 
@@ -1085,14 +1092,14 @@
                     });
 
                     function checkWords() {
-                        console.log(qry_tbls);
+                        // console.log(qry_tbls);
                         var text = editor.getValue();
                         var words = text.split(/\s+|[,.;]+/);                        
                         words.forEach(function(word) {
                         if (qry_tbls.includes(word)) {
                             document.getElementById('table_select').value = word;
 
-                            console.log(word + " found in the list!");
+                            // console.log(word + " found in the list!");
                             // Call your function here if a word matches
                         }
                         });
@@ -1107,12 +1114,12 @@
                 // document.getElementById('content').innerHTML = JSON.stringify(data.settings);
             })
             .catch(error => {
-                console.error('Error fetching data:', error);
+                // console.error('Error fetching data:', error);
             });
     });
     
     
-    // console.log('loaded');
+    // // console.log('loaded');
     
     function on_settings_got(settings){
         if (settings){
@@ -1122,7 +1129,7 @@
         wrksheet_con_select = document.getElementById('connections_select');
         wrksheet_tbl_select = document.getElementById('table_select');
 
-        // console.log(settings);
+        // // console.log(settings);
         for (key in settings['sources_list']) {
             option = document.createElement("option");
             option.text = key;
@@ -1134,7 +1141,7 @@
 
         qry_tbls = settings['sources_list'][wrksheet_con_select.value];
         qry_tbls = qry_tbls.map(filename => filename.name.replace(`.${source}`, ""));
-        console.log(qry_tbls);
+        // console.log(qry_tbls);
 
 
 
@@ -1147,7 +1154,7 @@
         });
         
 
-        // console.log(wrksheet_con_select.value);
+        // // console.log(wrksheet_con_select.value);
     }
     }
     
@@ -1170,7 +1177,7 @@
 
     function get_settings(settings){
         var container = document.getElementById('source_name');
-        console.log(settings)
+        // console.log(settings)
 
         data = settings['sources_list']
 
@@ -1210,7 +1217,7 @@
                 const elementHeading = document.createElement('div');
                 elementHeading.classList.add('element-heading');
                 elementHeading.innerHTML = `<a onclick="get_data('${connection_name}','${name}','${source}')">${name.replace(`.${source}`, '')}</a>`;
-                console.log(element.name)
+                // console.log(element.name)
 
 
 
@@ -1228,7 +1235,7 @@
                 const columnsList = document.createElement('ul');
                 columnsList.classList.add('column-name');
                 element.columns.forEach(column => {
-                    console.log(column)
+                    // console.log(column)
                     const columnItem = document.createElement('li');
                     columnItem.id = "column_name_li";
                     columnItem.textContent = `${column.name} (${column.dataType})`;
@@ -1249,7 +1256,7 @@
     }
 
     function toggle_fn(e){
-        console.log(e.target);
+        // console.log(e.target);
     // e.target.querySelector('div').classList.toggle('minimized');
   
     }
@@ -1264,7 +1271,8 @@
         document.getElementById('tbl_name').innerHTML = 'Loading...';
         document.getElementById('loading_p').innerHTML = 'Loading...';
         document.getElementById('table_cont').innerHTML = '';
-        document.getElementById('table_cont').innerHTML = '';
+        document.getElementById('struct_table_cont').innerHTML = '';
+        document.getElementById('settings_div').innerHTML = '';
         document.getElementById('container').innerHTML = '';
 
         document.getElementById('hidden_con').innerHTML = '';
@@ -1283,8 +1291,22 @@
             document.getElementById('loading_p').innerHTML = 'selected top 100';
             document.getElementById('table_cont').innerHTML = data['html']
             document.getElementById('struct_table_cont').innerHTML = data['struct']
+            
+            set = settings['settings'][connection_name]
+            settings_ul = document.createElement('ul')
+            for (key in set){
+                li = document.createElement('li')
+                li.textContent = `${key} : ${set[key]}`
+                settings_ul.appendChild(li)
+            }
+            document.getElementById('settings_div').appendChild(settings_ul)
 
-            // console.log(data['struct']);
+            
+
+            
+            
+
+            // // console.log(data['struct']);
 
             document.getElementById('hidden_con').innerHTML = connection_name
             document.getElementById('hidden_source').innerHTML = source
@@ -1292,14 +1314,14 @@
 
             if (data['filters']){
                 for (id in data['filters']){
-                    console.log(id);
-                    console.log(data);
+                    // console.log(id);
+                    // console.log(data);
 
                     addDiv(id,true);
                     filterDiv(id,data['filters'][id],true);
                 }
             }
-            // console.log(data);
+            // // console.log(data);
             const table = document.getElementById('data_tbl');
             const rows = table.querySelectorAll('tr');
 
@@ -1332,13 +1354,13 @@
                 });
                 }
             }else{
-                // console.log("11");
+                // // console.log("11");
                 generateColumnSelector(table);
             }
 
         })
         .catch(error => {
-            console.error('Error fetching data:', error);
+            // console.error('Error fetching data:', error);
             // Handle errors here
         });
     }
@@ -1392,20 +1414,20 @@
                     var column = headerCell.innerHTML.replace(/[▲▼]/g, '');
                     try {
                         const correctedJsonString = val.replace(/'/g, '"');
-                        console.log(correctedJsonString);
+                        // console.log(correctedJsonString);
                         val = JSON.parse(correctedJsonString);
-                        console.log(val);
+                        // console.log(val);
                         document.getElementById('value_cont_cont').innerHTML = `<h4>${column}</h4><pre>${JSON.stringify(val, undefined, 2)}</pre>`
 
                     } catch (e) {
 
-                        console.log(e);
+                        // console.log(e);
 
-                        document.getElementById('value_cont').innerHTML = `<h4>${column}</h4><pre>${val}</pre>`
+                        document.getElementById('value_cont_cont').innerHTML = `<h4>${column}</h4><pre>${val}</pre>`
                         
                     }
                 } else {
-                    console.log('No corresponding header cell found');
+                    // console.log('No corresponding header cell found');
                 }
             }
         });
@@ -1462,7 +1484,7 @@
 
         selected_cols[fid] = {"-1":event.currentTarget.checked};
         
-        // console.log(event.currentTarget.checked);
+        // // console.log(event.currentTarget.checked);
         const checkboxes = document.querySelectorAll('#columnCheckboxes input[type="checkbox"]');
         checkboxes.forEach(checkbox => {
                 checkbox.checked = event.currentTarget.checked;
@@ -1498,7 +1520,7 @@
                 // document.getElementById('table_cont').innerHTML = data['html'] 
             })
             .catch(error => {
-                console.error('Error fetching data:', error);
+                // console.error('Error fetching data:', error);
                 // Handle errors here
             });
     });
@@ -1507,7 +1529,7 @@
     function generateColumnSelector(table, columns,ex_filter = false) {
         // const table = document.getElementById('data_tbl');
         if(!ex_filter) {
-            // console.log('no ex_filter')
+            // // console.log('no ex_filter')
             const headers = table.querySelectorAll('th');
             const columnCheckboxes = document.getElementById('columnCheckboxes');
 
@@ -1530,7 +1552,7 @@
                 columnCheckboxes.appendChild(document.createElement('br'));
         });
         }else{
-            console.log(columns)
+            // console.log(columns)
             // for (key in columns){
                 const headers = table.querySelectorAll('th');
                 const columnCheckboxes = document.getElementById('columnCheckboxes');
@@ -1618,7 +1640,7 @@
             selected_cols[fid]['-1'] = allChecked
 
         }
-        console.log(selected_cols)
+        // console.log(selected_cols)
 
 
         fetch(`/column_filter/${selected_cols}`,{
@@ -1638,7 +1660,7 @@
             // document.getElementById('table_cont').innerHTML = data['html'] 
         })
         .catch(error => {
-            console.error('Error fetching data:', error);
+            // console.error('Error fetching data:', error);
             // Handle errors here
         });
     }
@@ -1694,7 +1716,7 @@
         });
 
         const observer3 = new MutationObserver(function(mutations) {
-            console.log(mutations);
+            // console.log(mutations);
             mutations.forEach(function(mutation) {
                 if (mutation.addedNodes.length > 0) {
                     mutation.addedNodes.forEach(function(node) {
@@ -1756,6 +1778,7 @@
 
     function addJoin() {
             id = "id" + Math.random().toString(16).slice(2)
+            // console.log(id)
             const container = document.getElementById('container_join');
 
             // Create div container
@@ -1796,10 +1819,26 @@
 
             join_table.id = 'join_table'
 
-            // var option2 = document.createElement("option");
-            // option2.text = "condition";
-            // option2.value = "condition";
-            // select.appendChild(option2)
+            // // console.log(settings);
+            for (key in settings['sources_list']) {
+                option = document.createElement("option");
+                option.text = key;
+                option.value = key;
+                join_source.appendChild(option)
+            }
+            source = settings['settings'][join_source.value]['source'];
+
+            qry_tbls = settings['sources_list'][join_source.value]
+            // // console.log(qry_tbls)    
+            qry_tbls = qry_tbls.map(filename => filename.name.replace(`.${source}`, ""));
+
+            settings['sources_list'][join_source.value].forEach((tbls)=>{
+                tbls = tbls.name.replace(`.${source}`,'');
+                option = document.createElement("option");
+                option.text = tbls;
+                option.value = tbls;
+                join_table.appendChild(option)
+            });
 
             divContent.appendChild(join_source);
             divContent.appendChild(join_table);
@@ -1816,6 +1855,49 @@
 
             // Append container to main container
             container.appendChild(divContainer);
+
+
+            // Join options
+
+            join_source.addEventListener('change', ()=>{
+            
+                document.getElementById('join_table').innerHTML = ''
+
+                source = settings['settings'][join_source.value]['source'];
+
+                qry_tbls = settings['sources_list'][join_source.value]
+                qry_tbls = qry_tbls.map(filename => filename.name.replace(`.${source}`, ""));
+                
+                
+                join_table.innerHTML = ''
+
+                settings['sources_list'][join_source.value].forEach((tbls)=>{
+                    
+                    tbls["name"] = tbls.name.replace(`.${source}`,'');
+                    option = document.createElement("option");
+
+                    option.text = tbls["name"];
+                    option.value = tbls["name"];
+                    join_table.appendChild(option)
+                });
+                
+            });
+
+            apply_btn.addEventListener('click', () =>{
+                cur_conn = document.getElementById('connections_select').value;
+                cur_tbl = document.getElementById('table_select').value;
+
+                join_con = join_source.value;
+                join_tbl = join_table.value;
+                
+                id = apply_btn.id.replace("join_apply_btn","")
+
+                comb = cur_conn + cur_tbl
+                if (!(comb in joins)){
+                    joins[comb] = {}
+                }
+                joins[comb][id] = {"connection" : join_con, "table" : join_tbl}
+            });
     }
 
     function addDiv(id='fresh',ex_filter=false) {
@@ -1829,7 +1911,7 @@
 
         }
 
-        console.log(id_);
+        // console.log(id_);
 
         
         if(document.getElementById('data_tbl')){
@@ -1914,7 +1996,7 @@
             document.getElementById('table_cont').innerHTML = data['html'] 
         })
         .catch(error => {
-            console.error('Error fetching data:', error);
+            // console.error('Error fetching data:', error);
             // Handle errors here
         });
 
@@ -1925,7 +2007,7 @@
     function remove(element, div_id){
             // let index  = tags.indexOf(tag);
             // tags = [...tags.slice(0, index), ...tags.slice(index + 1)];
-            // console.log(tags);
+            // // console.log(tags);
             removeFilterFromTable(div_id, false);
             tags[div_id]["column_name"] = '';
             element.parentElement.remove();
@@ -1938,7 +2020,7 @@
 
         if (ex_filter){
             div_id = div
-            console.log('heare=====')
+            // console.log('heare=====')
             div_cont = document.getElementById(div_id)
             if (opt_val['condition'] =='condition'){
 
@@ -1963,7 +2045,7 @@
                     //     let liTag = `<li>${tag} <i class="uit uit-multiply" onclick="remove(this, '${tag}')"></i></li>`;
                     //     ul.insertAdjacentHTML("afterbegin", liTag);
                     // });
-                    console.log(tags);
+                    // console.log(tags);
                     let liTag = `<li>${tags[div_id]["column_name"]} <i class="uit uit-multiply" onclick="remove(this, '${div_id}')"></i></li>`;
                     ul.insertAdjacentHTML("afterbegin", liTag);
                 }
@@ -2083,7 +2165,7 @@
                 for (var i = 0; i < logic_list.length; i++) {
                     var option = document.createElement("option");
 
-                    console.log(logic_list[i]);
+                    // console.log(logic_list[i]);
                     
                     option.text = logic_list[i];
                     option.value = logic_list[i];
@@ -2136,7 +2218,7 @@
                     var logic1_val = document.getElementById('logic1_value'+div_id).value;
                     var column_name = tags[div_id]["column_name"];
 
-                    console.log(logic1_val);
+                    // console.log(logic1_val);
                     if (!logic1_val){
                         logic1_val = logic1_op;
                     }
@@ -2145,7 +2227,7 @@
                         tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val,"column_name": column_name,"condition":"condition"}
 
 
-                        // console.log(logic1_op, logic1_val, column_name);
+                        // // console.log(logic1_op, logic1_val, column_name);
 
                         fetch(`/filter/${logic1_op}/${logic1_val}/${column_name}/${div_id}`) 
                         .then(response => {
@@ -2158,7 +2240,7 @@
                             document.getElementById('table_cont').innerHTML = data['html'] 
                         })
                         .catch(error => {
-                            console.error('Error fetching data:', error);
+                            // console.error('Error fetching data:', error);
                             // Handle errors here
                         });
                     
@@ -2177,7 +2259,7 @@
             }
         }
         else{
-            console.log('heare++++++++++')
+            // console.log('heare++++++++++')
 
             if (opt_val =='condition'){
                 tags[div_id] = {"column_name":""}
@@ -2354,7 +2436,7 @@
                     var logic1_val = document.getElementById('logic1_value'+div_id).value;
                     var column_name = tags[div_id]["column_name"];
 
-                    console.log(logic1_val);
+                    // console.log(logic1_val);
                     if (!logic1_val){
                         logic1_val = logic1_op;
                     }
@@ -2363,7 +2445,7 @@
                         tags[div_id] = {"logic1_op": logic1_op, "logic1_val": logic1_val,"column_name": column_name,"condition":"condition"}
 
 
-                        // console.log(logic1_op, logic1_val, column_name);
+                        // // console.log(logic1_op, logic1_val, column_name);
 
                         fetch(`/filter/${logic1_op}/${logic1_val}/${column_name}/${div_id}`) 
                         .then(response => {
@@ -2376,7 +2458,7 @@
                             document.getElementById('table_cont').innerHTML = data['html'] 
                         })
                         .catch(error => {
-                            console.error('Error fetching data:', error);
+                            // console.error('Error fetching data:', error);
                             // Handle errors here
                         });
 
@@ -2400,14 +2482,14 @@
     function filterDiv(div,data='',ex_filter=false) {
         var opt = document.getElementById('filter_option');
         // // filtering(div,opt.value)
-        console.log(ex_filter);
+        // console.log(ex_filter);
         if(ex_filter ) {
-            console.log('true 0')
+            // console.log('true 0')
             filtering(id,data,true)
 
         }
         else {
-            console.log('not true 0')
+            // console.log('not true 0')
             filtering(div,opt.value,false)
 
         }
@@ -2474,42 +2556,54 @@
         wrksheet_con_select = document.getElementById('connections_select').value;
         wrksheet_tbl_select = document.getElementById('table_select').value;
 
-        
+        cur_conn = wrksheet_con_select
+        cur_tbl = wrksheet_tbl_select
 
         
-        document.getElementById('value_cont_cont').innerHTML = `Loading ...` 
+        if (wrksheet_tbl_select != '')
+        {
+            if (query != ''){
+                document.getElementById('value_cont_cont').innerHTML = `Loading ...` 
         
-        // console.log(query);
+                // console.log(joins);
 
-        fetch(`/run_query`,{
-        
-        headers : {
-        'Content-Type' : 'application/json'
-        },
-        method : 'POST',
-        body : JSON.stringify({"query" : query,"connection":wrksheet_con_select,"table":wrksheet_tbl_select})
-        }) 
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+                fetch(`/run_query`,{
+                
+                    headers : {
+                    'Content-Type' : 'application/json'
+                    },
+                    method : 'POST',
+                    body : JSON.stringify({"query" : query,"connection":wrksheet_con_select,"table":wrksheet_tbl_select,"joins":joins})
+                    }) 
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                                    
+                    document.getElementById('value_cont_cont').innerHTML = `<a href="/xl_download"><i class="fa fa-download"></i></a><div id="table_cont">${data['html']}</div>` 
+                    document.getElementById('value_cont_cont').style.overflow = 'hidden'
+                })
+                .catch(error => {
+                    // console.error('Error fetching data:', error);
+                    // Handle errors here
+                });
+            }else{
+                document.getElementById('value_cont_cont').innerHTML = `NO result` 
+
             }
-            return response.json();
-        })
-        .then(data => {
-                            
-            document.getElementById('value_cont_cont').innerHTML = `<div id="table_cont">${data['html']}</div>` 
-            document.getElementById('value_cont_cont').style.overflow = 'hidden'
-        })
-        .catch(error => {
-            console.error('Error fetching data:', error);
-            // Handle errors here
-        });
+            
+        }else{
+            alert('No tables selected')
+        }
+        
         
     }
     
-    // wrksheet_con_select = document.getElementById('connections_select');
-    // wrksheet_tbl_select = document.getElementById('table_select');
 
+    // worksheet options
     document.getElementById('connections_select').addEventListener('change', ()=>{
         wrksheet_con_select = document.getElementById('connections_select');
         wrksheet_tbl_select = document.getElementById('table_select');
@@ -2519,14 +2613,14 @@
         source = settings['settings'][wrksheet_con_select.value]['source'];
 
         qry_tbls = settings['sources_list'][wrksheet_con_select.value]
-        // console.log(qry_tbls)    
+        // // console.log(qry_tbls)    
         qry_tbls = qry_tbls.map(filename => filename.name.replace(`.${source}`, ""));
         
 
 
 
         settings['sources_list'][wrksheet_con_select.value].forEach((tbls)=>{
-            // console.log(tbls.name)
+            // // console.log(tbls.name)
             
             tbls["name"] = tbls.name.replace(`.${source}`,'');
             option = document.createElement("option");
@@ -2537,6 +2631,8 @@
         });
         
     });
+
+    
 
 
     

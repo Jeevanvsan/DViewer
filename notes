@@ -1,5 +1,4 @@
 connection to add -
-    * xml
     * postgres
     * API
     * JSON

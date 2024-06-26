@@ -61,6 +61,7 @@ class main:
             fn(value,settings)
             q.task_done()
 
+
     
     def get_column_data(self,file,source):
         if source in ["csv", "parquet"]:
@@ -507,30 +508,38 @@ class main:
             query = str(data['query'])
             connection = data['connection']
             table = data['table']
+            joins = data['joins']
+
+            print(joins)
 
             # ##print(connection)
 
 
             source = settings[connection]['source']
-
-            if connection in os.listdir('fi'):
-                if table in os.listdir(f"fi/{connection}"):
-                    if source in ['csv','xls','parquet']:
-                        table = f"{table}.{source}"
-                    df = self.spark.read.format("parquet").load(f"fi/{connection}/{table}.parquet")
-                else:
-                    df = self.read_data(connection,table,source,False)
-                    df = df['data']
-
-
-                # df.show()
-            else:
-                df = self.read_data(connection,table,source,False)
-                df = df['data']
+            df = self.read_data_(connection,table,source)
+            
 
             # df.show()
 
             df.createOrReplaceTempView(str(table))
+
+            if connection+table in joins:
+
+                table_joined = joins[connection+table]
+
+                for key, join in table_joined.items():
+                    join_con = join['connection']
+                    join_table = join['table']
+                    join_source = settings[join_con]['source']
+                    # print(join_table)
+
+                    join_df = self.read_data_(join_con,join_table,join_source)
+
+                    # join_df.show()
+
+                    join_df.createOrReplaceTempView(str(join_table))
+
+            # self.spark.sql("SHOW VIEWS").show()
 
             checked_query = self.check_query(query)
 
@@ -541,10 +550,24 @@ class main:
             else:
                 return {'error':  "provide only DQL queries"}
 
-            # filtered_df.show()
+                # filtered_df.show()
         except Exception as e:
             return {'error':  str(e)}
 
+    def read_data_(self,connection,table,source):
+        if connection in os.listdir('fi'):
+            if table in os.listdir(f"fi/{connection}"):
+                if source in ['csv','xls','parquet']:
+                    table = f"{table}.{source}"
+                df = self.spark.read.format("parquet").load(f"fi/{connection}/{table}.parquet")
+            else:
+                df = self.read_data(connection,table,source,False)
+                df = df['data']
+        else:
+            df = self.read_data(connection,table,source,False)
+            df = df['data']
+        
+        return df
 
     def check_query(self, query):
         config = FluffConfig(overrides=dict(dialect='tsql'))
@@ -561,14 +584,13 @@ class main:
         stmts = json_path.rtn_get_json_keypaths(parsed,'file.batch.statement', top_level=True)[0]
         for key, value in stmts.items():
             ##print(key)
-            if str(key.replace('_statement','')).upper() in dql_keywords:
-                return True
-            else:
+            try:
+                if str(key.replace('_statement','')).upper() in dql_keywords:
+                    return True
+                else:
+                    return False
+            except:
                 return False
-
-
-            
-        
 
 
 
