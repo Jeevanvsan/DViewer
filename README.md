@@ -7,6 +7,7 @@
 - *csv*
 - *parquet*
 - *xlsx*
+- *api*
 - *sql server*
 - *snowflake*
 

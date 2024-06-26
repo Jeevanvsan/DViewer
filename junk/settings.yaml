@@ -1,5 +1,3 @@
-
-
 sqlserver_connection:
   source: sqlserver
   name: sqlserver_connection
@@ -32,3 +30,10 @@ snowflake_connection:
 xlsx_connection:
   source: xlsx
   name: xlsx_connection
+
+
+api_connection:
+  source: api
+  name: api_connection
+  url: https://jsonplaceholder.typicode.com/todos
+  

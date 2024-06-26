@@ -59,6 +59,7 @@ def get_data(connection_name, name,source):
     main_ob = main()
         
     data = ''
+    struct = ''
     table_cache['name'] = name
     table_cache['connection_name'] = connection_name
     table_cache['source'] = source
@@ -75,6 +76,13 @@ def get_data(connection_name, name,source):
     if fid in table_cache:
         data = table_cache[f'{fid}']['data']
         struct = table_cache[f'{fid}']['struct']
+    
+    elif os.path.exists(f"fi/{connection_name}/{name}.parquet"):
+        data_pd = pd.read_parquet(f"fi/{connection_name}/{name}.parquet")
+        data = data_pd.head(100).to_html(classes='table',table_id="data_tbl", index=False)
+        struct = pd.read_parquet(f"fi/{connection_name}/struct/{name}.parquet").head(100).to_html(classes='table',table_id="struct_data_tbl", index=False)
+        data_pd.to_excel(f'fi/{connection_name}/{name}.xlsx', index=False)
+        table_cache[f'{fid}'] = {'data':data,"struct":struct}
 
     else:
         df = main_ob.read_data(connection_name,name,source)

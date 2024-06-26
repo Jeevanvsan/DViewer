@@ -1,12 +1,19 @@
+import json
+import requests
 import yaml
 import os
 import sys
-import multiprocessing
 from pyspark.sql import SparkSession
 from utils import json_path
+from urllib.parse import urlparse
+
 import csv
 import pandas as pd
 from pyspark.sql.functions import col, trim
+from pyspark.sql.types import StructType
+import pyspark.sql.functions as F
+
+
 from sqlfluff.core.parser import Lexer, Parser
 from sqlfluff.core import FluffConfig
 import snowflake.connector
@@ -17,7 +24,6 @@ from threading import Thread
 from queue  import Queue
 
 
-from multiprocessing.pool import ThreadPool
 
 
 os.environ['PYSPARK_PYTHON'] = sys.executable
@@ -28,14 +34,11 @@ os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 class main:
     def __init__(self):
         jdbc_jar_path = 'connectors/sqljdbc_12.2/enu/mssql-jdbc-12.2.0.jre8.jar' 
-        self.spark = SparkSession.builder.appName("DViewer").config("spark.executor.cores", '3').config("spark.jars", jdbc_jar_path).getOrCreate()
+        self.spark = SparkSession.builder.appName("DViewer").config("spark.executor.memory", "8g").config("spark.driver.memory", "4g").config("spark.jars", jdbc_jar_path).getOrCreate()
     
     def get_source_data(self):
         with open('configs/settings.yaml') as setting_file:
             settings = yaml.safe_load(setting_file)
-
-        
-
 
         self.source_data = {}
         if settings:
@@ -51,7 +54,7 @@ class main:
                 t.start()
 
             q.join()
-                  
+
             self.source_data["sources_list"] = self.sources_list
         return self.source_data
     
@@ -63,7 +66,7 @@ class main:
 
 
     
-    def get_column_data(self,file,source):
+    def get_column_data(self,file,source,connection_name,name):
         if source in ["csv", "parquet"]:
             data = self.spark.read.format(source).load(f"inputs/{file}",header=True)
             struct = [
@@ -72,12 +75,32 @@ class main:
                     }
                     for field in data.schema.fields
                 ]
+            data = data.na.fill('Null')
+            
+            struct_pd = {
+                    field.name: {
+                        "dataType": field.dataType.simpleString(),
+                        "nullable": field.nullable,
+                    }
+                    for field in data.schema.fields
+                }
+            
+            struct_pd = pd.DataFrame.from_dict(struct_pd, orient='index')
+            struct_pd.reset_index(inplace=True)
+            struct_pd.rename(columns={'index': 'column_name'}, inplace=True)
+
+            if not os.path.exists(f'fi/{connection_name}'):
+                os.mkdir(f'fi/{connection_name}')
+
+            if not os.path.exists(f'fi/{connection_name}/struct'):
+                os.mkdir(f'fi/{connection_name}/struct')
+
+            data.toPandas().to_parquet(f'fi/{connection_name}/{name}.parquet',index=False)
+            struct_pd.to_parquet(f'fi/{connection_name}/struct/{name}.parquet',index=False)
             
             return struct
 
             
-
-    
     def source_read(self,sources,settings):
         self.files = []
         if sources['source'] in ['csv','xlsx','parquet'] :
@@ -87,7 +110,7 @@ class main:
                 if sources['source'] in file:
                     file_data = {}
                     file_data["name"] = file
-                    file_data["columns"] =  self.get_column_data(file,sources['source'])
+                    file_data["columns"] =  self.get_column_data(file,sources['source'],sources['name'],file)
 
                     self.files.append(file_data)
             
@@ -115,16 +138,7 @@ class main:
                         }
             data = self.spark.read.jdbc(url=jdbc_url, table=query, properties=properties)
 
-
-            
-
-
-            ##print("on sql settings reading done")
-
             source_data = {}
-
-
-            # table_names = [row.TABLE_NAME for row in data.collect()]
             table_names = []
 
             for row in data.collect():
@@ -143,20 +157,6 @@ class main:
 
                 table_names.append(table_data)
 
-
-
-            # for tbls in table_names:
-            #     source_data[''] = 
-
-            #     query1 = f"(SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '{schema}' AND table_name = '{tbls}';) AS table_list"
-
-            #     column_data = self.spark.read.jdbc(url=jdbc_url, table=query1, properties=properties)
-
-
-
-
-
-            # ##print(table_names)
 
             sources['server'] = sources['server'].replace('\\', '\\\\')
 
@@ -179,8 +179,6 @@ class main:
             schema= sources['schema']
             warehouse= sources['warehouse']
             role= sources['role']
-
-            ##print("on snowflake settings")
 
 
             conn = snowflake.connector.connect(
@@ -214,11 +212,106 @@ class main:
             self.sources_list[sources['name']] = self.files
 
         elif sources['source'] in 'api' :
-            pass
+            url = sources['url']
+            parsed_url = urlparse(url)
+            hostname = parsed_url.hostname
+
+            headers = {
+                "Accept": "application/json",
+            }
+            params = {}
+            # params = {
+            #     "animal_type": "cat",
+            #     "amount": "10",
+            # }
+            response = requests.get(url, headers=headers,params=params)
+
+            data = response.json()
+
+            # print(data)
+            # print(data["Time Series (Daily)"])
+
+            # Convert JSON data to RDD
+            rdd = self.spark.sparkContext.parallelize([json.dumps(data)])
+            
+
+
+            # Read RDD as DataFrame
+
+
+            df = self.spark.read.json(rdd)
+
+            # df.show()
+            def flatten_df(df):
+                # Get the schema of the DataFrame
+                schema = df.schema
+
+                # List to store new column names and expressions
+                new_columns = []
+
+                # Process each field in the schema
+                for field in schema.fields:
+                    if isinstance(field.dataType, StructType):
+                        # If field is a StructType (nested structure), flatten it
+                        for inner_field in field.dataType.fields:
+                            # Append parent field name to avoid ambiguity
+                            new_column_name = f"{field.name}_{inner_field.name}"
+                            new_columns.append(F.col(field.name)[inner_field.name].alias(new_column_name))
+                    else:
+                        # If field is not a StructType, keep it as-is
+                        new_columns.append(F.col(field.name))
+
+                # Select the flattened columns and return the DataFrame
+                return df.select(new_columns)
+
+            # Flatten nested structures in the DataFrame
+            df_flat = flatten_df(df)
+
+            df_flat = df_flat.na.fill('Null')
+
+            if not os.path.exists(f'fi/{sources["name"]}'):
+                os.mkdir(f'fi/{sources["name"]}')
+
+            df_flat.toPandas().to_parquet(f'fi/{sources["name"]}/{hostname}.parquet',index=False)
+
+            
+
+            file_data = {}
+            file_data["name"] = hostname
+
+            struct = [
+                    {"name": field.name,
+                    "dataType": field.dataType.simpleString()
+                    }
+                    for field in df_flat.schema.fields
+                ]
+            struct_pd = {
+                    field.name: {
+                        "dataType": field.dataType.simpleString(),
+                        "nullable": field.nullable,
+                    }
+                    for field in df_flat.schema.fields
+                }
+
+            file_data["columns"] =  struct
+
+            self.files.append(file_data)
+
+            if not os.path.exists(f'fi/{sources["name"]}/struct'):
+                os.mkdir(f'fi/{sources["name"]}/struct')
+            
+            struct_pd = pd.DataFrame.from_dict(struct_pd, orient='index')
+            struct_pd.reset_index(inplace=True)
+            struct_pd.rename(columns={'index': 'column_name'}, inplace=True)
+            
+            struct_pd.to_parquet(f'fi/{sources["name"]}/struct/{hostname}.parquet',index=False)
+            
+            self.sources_list[sources['name']] = self.files
+            
             
     
 
-    def read_data(self,connection_name,name,source,flag = True):
+    def read_data(self,connection_name,name,source,flag = True):            
 
         if ('csv' in source):
             if not flag:
@@ -429,6 +522,89 @@ class main:
                 
 
             return {"data": data,"struct":struct}
+        if('api' in source):
+            with open('configs/settings.yaml') as setting_file:
+                settings = yaml.safe_load(setting_file.read())
+            
+            connections = settings[connection_name]
+
+            url = connections['url']
+            headers = {
+                "Accept": "application/json",
+            }
+            params = {}
+            # params = {
+            #     "animal_type": "cat",
+            #     "amount": "10",
+            # }
+
+            response = requests.get(url, headers=headers,params=params)
+
+            data = response.json()
+
+            # print(data)
+            # print(data["Time Series (Daily)"])
+
+            # Convert JSON data to RDD
+            rdd = self.spark.sparkContext.parallelize([json.dumps(data)])
+            
+
+
+            # Read RDD as DataFrame
+
+
+            df = self.spark.read.json(rdd)
+
+            # df.show()
+            def flatten_df(df):
+                # Get the schema of the DataFrame
+                schema = df.schema
+
+                # List to store new column names and expressions
+                new_columns = []
+
+                # Process each field in the schema
+                for field in schema.fields:
+                    if isinstance(field.dataType, StructType):
+                        # If field is a StructType (nested structure), flatten it
+                        for inner_field in field.dataType.fields:
+                            # Append parent field name to avoid ambiguity
+                            new_column_name = f"{field.name}_{inner_field.name}"
+                            new_columns.append(F.col(field.name)[inner_field.name].alias(new_column_name))
+                    else:
+                        # If field is not a StructType, keep it as-is
+                        new_columns.append(F.col(field.name))
+
+                # Select the flattened columns and return the DataFrame
+                return df.select(new_columns)
+
+            # Flatten nested structures in the DataFrame
+            df_flat = flatten_df(df)
+            df_flat = df_flat.na.fill('Null')
+
+            if not os.path.exists(f'fi/{connection_name}'):
+                os.mkdir(f'fi/{connection_name}')
+
+            df_flat.toPandas().to_parquet(f'fi/{connection_name}/{name}.parquet',index=False)
+
+            struct = {
+                    field.name: {
+                        "dataType": field.dataType.simpleString(),
+                        "nullable": field.nullable,
+                    }
+                    for field in df_flat.schema.fields
+                }
+
+            struct = pd.DataFrame.from_dict(struct, orient='index')
+            struct.reset_index(inplace=True)
+            struct.rename(columns={'index': 'column_name'}, inplace=True)
+            
+            if flag:
+                df_flat = df_flat.toPandas()
+
+
+            return {"data": df_flat,"struct":struct}
+            
         
 
         
