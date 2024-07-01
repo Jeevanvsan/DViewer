@@ -1,19 +1,6 @@
-sqlserver_connection:
-  source: sqlserver
-  name: sqlserver_connection
-  user: jeevan.v
-  password: experion@123
-  server: JEEVANV\SQLEXPRESS
-  localhost: None
-  database: AdventureWorksLT2022
-  schema: SalesLT
 
 csv_connection:
   source: csv
   name: csv_connection
 
-api_connection:
-  source: api
-  name: api_connection
-  url: https://jsonplaceholder.typicode.com/comments
-  
+

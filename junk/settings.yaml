@@ -37,3 +37,7 @@ api_connection:
   name: api_connection
   url: https://jsonplaceholder.typicode.com/todos
   
+json_connection:
+  source: json
+  name: json_connection
+
