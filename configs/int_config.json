@@ -1,0 +1,9 @@
+{
+    "source":[
+        "csv",
+        "parquet",
+        "xlsx",
+        "sqlserver",
+        "snowflake"
+    ]
+}

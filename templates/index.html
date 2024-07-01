@@ -27,6 +27,9 @@
 
 
 
+
+
+
     <title>DViewer</title>
     <style>
         body{
@@ -744,6 +747,8 @@
             font-size: 25px;
             color: white;
         }
+
+        
         #data_right{
             display: none;
         }
@@ -844,6 +849,160 @@
             text-align: left;
 
         }
+
+        #addCon_div {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            background-color: #000000ca;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 25px;
+            color: white;
+        }
+        #con_inputs_div {
+            background-color: #c6c6c6;
+            width: 50%;
+            height: 70vh;
+            position: absolute;
+            border-radius: 10px;
+        }
+
+        #con_input_close_btn{
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            background: transparent;
+            border: 1px solid #fff;
+            color: white;
+            border-radius: 49%;
+            font-size: 1.3em;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        #addcon_head{
+            color: #4f4c4c;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        #con_inputs_table th{
+            color: #4f4c4c;
+            font-size: 0.8em;
+            padding: 20px;
+        }
+
+        #con_inputs_table td{
+            color: #4f4c4c;
+        }
+        #con_inputs_table{
+            width: 80%;
+            text-align: left;
+        }
+
+        #con_inputs_table tr {
+            padding: 10px;
+        }
+
+        /*----------------------------------------------------------------*/
+
+        #con_inputs_table_2 th{
+            color: #4f4c4c;
+            font-size: 0.8em;
+            padding: 20px;
+        }
+
+        #con_inputs_table_2 td{
+            color: #4f4c4c;
+        }
+        #con_inputs_table_2{
+            width: 80%;
+            text-align: left;
+        }
+
+        #con_inputs_table_2 tr {
+            padding: 10px;
+        }
+
+        #form_table{
+            width: 90%;
+            margin-left: 30px;
+            height: 50vh;
+            overflow-x: auto ;
+            background-color: #fff;
+            border-radius: 10px;
+            border: #4f4d4d4f 1px solid;
+            box-shadow: 0px 0px 0px 1px #4f4d4d4f;
+            padding: 10px 15px;
+        }
+
+        #conn_save_btn{
+            background-color: #000000ca;
+            justify-content: center;
+            align-items: center;
+            font-size: 17px;
+            color: white;
+            position: absolute;
+            margin-top: 30px;
+            padding: 10px 30px;
+            border-radius: 5px;
+            left: 45%;
+            cursor: pointer;
+        }
+
+        .inp_text{
+            font-size: 0.8em;
+            background-color: transparent;
+            border-radius: 3px;
+            border: none;
+            border-bottom: #4f4d4d 1px solid;
+            width: 100%;
+
+        }
+
+        .inp_text:focus{
+            border: none;
+            border-bottom: #4f4d4d 1px solid;
+            outline: none;
+
+        }
+
+        .con_select{
+            font-size: 0.8em;
+            border: none;
+            border-bottom: #4f4d4d 1px solid;
+            
+            padding: 10px;
+        }
+
+        .con_select:focus{
+            border: none;
+            border-bottom: #4f4d4d 1px solid;
+            outline: none;
+
+        }
+
+        
+        #file {
+            cursor: pointer; 
+            padding: 20px;
+            margin-top: 10px;
+            font-size: 16px;
+        } 
+
+        #con_err_p{
+            font-size: 0.6em;
+            color: red;
+            margin-left: 100px;
+        }
+
+        #con_ok_p{
+            font-size: 0.6em;
+            color: green;
+            margin-left: 100px;
+        }
+        
         
     </style>
 </head>
@@ -866,15 +1025,38 @@
                 </ul>
             </div>
         </header>
-        <div class="body_cont">
+        <div id="addCon_div">
+            <div id="con_inputs_div">
+                <button id="con_input_close_btn" onclick="close_addCon_div()"><i class="fa fa-close" aria-hidden="true"></i></button>
+                <h1 id="addcon_head">New connection</h1>
+                <!-- <form enctype="multipart/form-data"> -->
+                    <div id="form_table">
+                        <table id="con_inputs_table">
+                            <tr>
+                                <th>connection name</th>
+                                <td><input type="text" class="inp_text" id="con_name_input" required></td>
+                            </tr>
+                            <tr>
+                                <th>source</th>
+                                <td><select id="con_source_select" class="con_select"></select></td>
+                            </tr>
+                        </table>
+                        <table id="con_inputs_table_2">
+                        </table>
+                    </div>
+                    <button id="conn_save_btn" onclick="save_con()" >save</button><p id="con_err_p"></p><p id="con_ok_p"></p>
+                <!-- </form> -->
+            </div>
+        </div>
+        <div class="body_cont" id="body_cont"  >
             <div class="left_cont">
                 <button onclick="addConnection()" id="addcon_btn">Add connection</button>
                 <ul id="source_name">
 
                 </ul>
             </div>
-            <div class="middle_cont">
-                <div class="warpper">
+            <div class="middle_cont" >
+                <div class="warpper" >
                     <input class="radio" id="one" name="group" type="radio" checked>
                     <input class="radio" id="two" name="group" type="radio">
                     <input class="radio" id="three" name="group" type="radio"  >
@@ -885,7 +1067,7 @@
                     <label class="tab" id="three-tab" for="three">Structure</label>
                     <label class="tab" id="four-tab" for="four">Settings</label>
                     </div>
-                    <div class="panels" id="panels">
+                    <div class="panels" id="panels" >
                         <div class="panel" id="one-panel">
                             <div id="query_main">
                                 <div id="query_top">
@@ -893,8 +1075,8 @@
                                     <select id="connections_select"></select>
                                     <select id="table_select"></select>
                                 </div>
-                                <div id="query_sheet">
-                                    <div id="sheet_middle">
+                                <div id="query_sheet" >
+                                    <div id="sheet_middle" >
                                         <textarea id="query_inp"></textarea>
                                     </div>
                                 </div>
@@ -1006,9 +1188,11 @@
     selected_cols = {};
     qry_tbls = [];
     settings = {};
+    int_conf = {};
     joins = {};
     cur_conn = '';
     cur_tbl = '';
+    conn_add_err = [];
 
     
 
@@ -1042,6 +1226,8 @@
             .then(data => {
 
                 settings = data["settings"]
+                int_conf = data["int_conf"]
+                // console.log(int_conf)
                 // // console.log("data loaded");
                 on_settings_got(data["settings"])
                 
@@ -1159,47 +1345,51 @@
     // // console.log('loaded');
     
     function on_settings_got(settings){
-        if (settings){
-        get_settings(settings);
+        console.log("nil")
+        if (Object.keys(settings).length > 0) 
+        {
+            get_settings(settings);
 
-        console.log(settings)
-        
+            console.log(settings)
+
             
-        wrksheet_con_select = document.getElementById('connections_select');
-        wrksheet_tbl_select = document.getElementById('table_select');
+                
+            wrksheet_con_select = document.getElementById('connections_select');
+            wrksheet_tbl_select = document.getElementById('table_select');
 
-        // // console.log(settings);
-        for (key in settings['sources_list']) {
-            option = document.createElement("option");
-            option.text = key;
-            option.value = key;
-            wrksheet_con_select.appendChild(option)
+            // // console.log(settings);
+            for (key in settings['sources_list']) {
+                option = document.createElement("option");
+                option.text = key;
+                option.value = key;
+                wrksheet_con_select.appendChild(option)
+            }
+            source = settings['settings'][wrksheet_con_select.value]['source'];
+
+
+            qry_tbls = settings['sources_list'][wrksheet_con_select.value];
+            qry_tbls = qry_tbls.map(filename => filename.name.replace(`.${source}`, ""));
+            // console.log(qry_tbls);
+
+
+
+            settings['sources_list'][wrksheet_con_select.value].forEach((tbls)=>{
+                tbls = tbls.name.replace(`.${source}`,'');
+                option = document.createElement("option");
+                option.text = tbls;
+                option.value = tbls;
+                wrksheet_tbl_select.appendChild(option)
+            });
+            
+
+            // // console.log(wrksheet_con_select.value);
+        }else{
+            console.log("no setings")
+            document.getElementById('loader').style.display = 'none';
         }
-        source = settings['settings'][wrksheet_con_select.value]['source'];
-
-
-        qry_tbls = settings['sources_list'][wrksheet_con_select.value];
-        qry_tbls = qry_tbls.map(filename => filename.name.replace(`.${source}`, ""));
-        // console.log(qry_tbls);
-
-
-
-        settings['sources_list'][wrksheet_con_select.value].forEach((tbls)=>{
-            tbls = tbls.name.replace(`.${source}`,'');
-            option = document.createElement("option");
-            option.text = tbls;
-            option.value = tbls;
-            wrksheet_tbl_select.appendChild(option)
-        });
-        
-
-        // // console.log(wrksheet_con_select.value);
-    }
     }
     
-    function addConnection(){
-    alert('Connection');
-    }
+   
     function toggleList(icon, element) {
     if (element.style.display === 'none') {
       element.style.display = 'block';
@@ -2708,7 +2898,143 @@
         
     });
 
-    
+    function addConnection(){
+        document.getElementById('addCon_div').style.display = "flex";
+        document.getElementById('body_cont').style.display = 'none';
+
+        con_select = document.getElementById("con_source_select");
+
+        console.log(int_conf['source'])
+
+        int_conf['source'].forEach((src)=>{
+            option = document.createElement("option");
+            option.text = src;
+            option.value = src;
+            con_select.appendChild(option)
+        });
+
+        add_source_inp()
+
+        con_select.addEventListener('change', ()=>{
+
+            document.getElementById("con_inputs_table_2").innerHTML = "";
+            add_source_inp()
+        })
+
+    }
+
+    function add_source_inp(){
+        source = document.getElementById("con_source_select").value;
+        table = document.getElementById("con_inputs_table_2");
+        if (source == "csv"){
+            tr = document.createElement("tr")
+            th = document.createElement("th")
+            th.innerText = "select csv files"
+            tr.appendChild(th)
+            
+            td = document.createElement("td")
+            td.innerHTML = `<input type='file' id='file' multiple onChange='checkFile("${source}")'></p>`
+            tr.appendChild(td)
+
+            table.appendChild(tr)
+            
+        }else if (source == "parquet"){
+            tr = document.createElement("tr")
+            th = document.createElement("th")
+            th.innerText = "select parquet files"
+            tr.appendChild(th)
+            
+            td = document.createElement("td")
+            td.innerHTML = `<input type='file' id='file' multiple onChange='checkFile("${source}")'></p>`
+            tr.appendChild(td)
+
+            table.appendChild(tr)
+        }
+    }
+
+    function checkFile(source){
+        var fileInput = document.getElementById('file');
+        var selectedFile = fileInput.files;
+
+        for (var i = 0; i < selectedFile.length; i++) {
+            fileName = selectedFile[i].name
+            format = fileName.slice(fileName.lastIndexOf('.') + 1).toLowerCase()
+            console.log(format)
+            if (format == source){
+                document.getElementById('con_err_p').innerText = ``
+                document.getElementById('conn_save_btn').disabled = false
+                document.getElementById('conn_save_btn').style.cursor = 'pointer'
+            }
+            else{
+                document.getElementById('conn_save_btn').disabled = true
+                document.getElementById('conn_save_btn').style.cursor = 'not-allowed'
+                document.getElementById('con_err_p').innerText = `selected file is not ${source} format`
+            }
+        }
+        
+    }
+
+    async function save_con(){
+
+        con_name = document.getElementById("con_name_input").value;
+        source = document.getElementById("con_source_select").value;
+
+        document.getElementById('con_err_p').innerText = ``
+        document.getElementById('con_ok_p').innerText = ``
+
+        var data = new FormData()
+
+        if (con_name == ""){
+            alert("Connection name is required")   
+        }
+        else if(['csv', 'parquet', 'json', 'yaml', 'xlsx'].includes(source)){
+            var fileInput = document.getElementById('file');
+            var selectedFile = fileInput.files;
+
+            if (selectedFile.length != 0){
+                for (var i = 0; i < selectedFile.length; i++) {
+                    data.append("file", selectedFile[i])
+                }
+                run_con_save(con_name,source,data)
+            }
+            else{
+                alert("choose files")
+            }
+        }
+    }
+
+    function run_con_save(con_name,source,data){
+        var connection = JSON.stringify({"name": con_name, "source": source});
+
+        data.append("connection", connection);
+
+        const res =   fetch(`/upload_file`,{
+            method: "POST",
+            body: data
+        });
+        res.then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }else{
+                document.getElementById('con_ok_p').innerText = `Connection saved successfully`
+            }
+        });
+    }
+
+    function close_addCon_div(){
+        document.getElementById('addCon_div').style.display = 'none';
+        document.getElementById('body_cont').style.display = 'flex';
+
+        document.getElementById('con_err_p').innerText = ``
+        document.getElementById('con_ok_p').innerText = ``
+        document.getElementById("con_inputs_table_2").innerHTML = "";
+
+        document.getElementById('conn_save_btn').disabled = false
+        document.getElementById('conn_save_btn').style.cursor = 'pointer'
+
+        location.reload();
+
+    }
 
 
     

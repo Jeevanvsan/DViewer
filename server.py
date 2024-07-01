@@ -42,6 +42,7 @@ def main_():
     filters = {}
     selected_cols = {}
 
+
     if os.path.exists('fi'):
         shutil.rmtree('fi')
         os.mkdir('fi')
@@ -49,9 +50,12 @@ def main_():
     from main import main
     main_ob = main()
 
-    
+    with open('configs/int_config.json','r') as int_config:
+        int_conf = json.load(int_config)
+
+
     settings = main_ob.get_source_data()
-    return jsonify(settings=settings)
+    return jsonify(settings=settings,int_conf = int_conf)
 
 @app.route('/get_data/<connection_name>/<name>/<source>')
 def get_data(connection_name, name,source):
@@ -176,6 +180,59 @@ def run_query():
 @app.route('/xl_download')
 def xl_download():
     return send_file('fi/DViewer.xlsx', as_attachment=True)
+
+@app.route('/upload_file',methods=['POST'])
+def upload_file():
+    files = request.files.getlist("file")
+
+    connection_data = request.form.get('connection')
+    connection = json.loads(connection_data)
+
+    conn_name = connection['name']
+    src = connection['source']
+
+    with open('configs/settings.yaml', 'r') as f:
+        settings = yaml.safe_load(f)
+
+
+    
+
+
+
+    rtn = False
+    file_names = []
+
+    out = 'output'
+    file_list = None
+   
+    # if os.path.exists('uploads'):
+    #     shutil.rmtree('uploads')
+    # if os.path.exists('uploads') is False:
+    #     os.mkdir('uploads')
+
+    
+    for file in files:
+        file_names.append(file.filename)
+        zip_path = os.path.join('inputs', file.filename)
+        file.save(zip_path)
+
+    if not settings:
+        settings = {}
+
+    settings.update({conn_name:{}})
+
+    if src in ['csv','parquet','xlsx']:
+        settings[conn_name]['files'] = file_names
+
+    settings[conn_name]['name'] = conn_name
+    
+    settings[conn_name]['source'] = src
+    
+
+    with open('configs/settings.yaml', 'w') as f:
+        yaml.safe_dump(settings, f,sort_keys=False)
+
+    return 'done'
 
 if __name__ == '__main__':
 

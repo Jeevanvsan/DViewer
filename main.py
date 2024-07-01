@@ -41,28 +41,33 @@ class main:
             settings = yaml.safe_load(setting_file)
 
         self.source_data = {}
+
         if settings:
-            q = Queue()
-            worker = 2
+            # q = Queue()
+            # worker = 2
             self.sources_list = {}
             for name,sources in settings.items():
-                q.put(sources)
-                # self.source_read(sources,settings) 
-            for i in range(worker):
-                t = Thread(target=self.run_task, args=(self.source_read,settings,q))
-                t.daemon = True
-                t.start()
+                self.source_read(sources,settings)
 
-            q.join()
+            #     q.put(sources)
+            #     # self.source_read(sources,settings) 
+            # for i in range(worker):
+            #     t = Thread(target=self.run_task, args=(self.source_read,settings,q))
+            #     t.daemon = True
+            #     t.start()
+
+            # q.join()
 
             self.source_data["sources_list"] = self.sources_list
+        else:
+            pass
         return self.source_data
     
-    def run_task(self, fn,settings,q):
-        while not q.empty():
-            value = q.get()
-            fn(value,settings)
-            q.task_done()
+    # def run_task(self, fn,settings,q):
+    #     while not q.empty():
+    #         value = q.get()
+    #         fn(value,settings)
+    #         q.task_done()
 
 
     
@@ -103,11 +108,14 @@ class main:
             
     def source_read(self,sources,settings):
         self.files = []
+        # print(settings)
+        # print(sources)
+
         if sources['source'] in ['csv','xlsx','parquet'] :
             self.source_data = {"settings": settings}
 
-            for file in os.listdir('inputs'):
-                if sources['source'] in file:
+
+            for file in sources['files']:
                     file_data = {}
                     file_data["name"] = file
                     file_data["columns"] =  self.get_column_data(file,sources['source'],sources['name'],file)
@@ -115,6 +123,8 @@ class main:
                     self.files.append(file_data)
             
             self.sources_list[sources['name']] = self.files
+
+            
 
         elif sources['source'] in 'sqlserver' :
 
@@ -289,8 +299,8 @@ class main:
             self.sources_list[sources['name']] = self.files
 
         elif sources['source'] in 'json' :
-            for file in os.listdir('inputs'):
-                if sources['source'] in file:
+            for file in sources['files']:
+                if sources['source'] == file:
                     
                     with open(f'inputs/{file}') as f:
                         data = json.load(f)
@@ -367,7 +377,7 @@ class main:
                 self.sources_list[sources['name']] = self.files
             
             
-    def flatten_df(self,df):
+        def flatten_df(self,df):
                 # Get the schema of the DataFrame
                 schema = df.schema
 

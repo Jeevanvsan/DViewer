@@ -1,6 +1,0 @@
-
-csv_connection:
-  source: csv
-  name: csv_connection
-
-
