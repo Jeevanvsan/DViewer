@@ -194,11 +194,6 @@ def upload_file():
     with open('configs/settings.yaml', 'r') as f:
         settings = yaml.safe_load(f)
 
-
-    
-
-
-
     rtn = False
     file_names = []
 
